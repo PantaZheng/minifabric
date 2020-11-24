@@ -6,7 +6,7 @@ if [ -f 'go.mod' ] && [ ! -d 'vendor' ]; then
   go mod vendor
   export GO111MODULE=off
 fi
-
+export GO111MODULE=off
 export ROOTPATH=/vars/keyfiles
 cp /vars/profiles/{{ CHANNEL_NAME}}_connection_for_gosdk.json connection.json
 go run main.go

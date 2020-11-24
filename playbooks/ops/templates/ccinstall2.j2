@@ -9,10 +9,13 @@ cd /go/src/github.com/chaincode/{{ CC_NAME }}
 
 if [ ! -f "{{ CC_NAME }}_{{ CC_LANGUAGE}}_{{ CC_VERSION }}.tar.gz" ]; then
 {% if CC_LANGUAGE == 'go' %}
-  cd {{ CC_LANGUAGE }}
-  GO111MODULE=on
-  go mod vendor
-  cd -
+  if [ -f 'go.mod' ] && [ ! -d 'vendor' ]; then
+    cd {{ CC_LANGUAGE }}
+    GO111MODULE=on
+    go mod vendor
+    cd -
+    GO111MODULE=off
+   fi
   peer lifecycle chaincode package {{ CC_NAME }}_{{ CC_LANGUAGE }}_{{ CC_VERSION }}.tar.gz \
     -p /go/src/github.com/chaincode/{{ CC_NAME}}/{{ CC_LANGUAGE }}/ \
     --lang golang --label {{ CC_NAME }}_{{ CC_VERSION }}

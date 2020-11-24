@@ -18,6 +18,10 @@
         CLINAME: "{{ current_location_hash[:10] }}_cli"
         NETNAME: "{{ current_location_hash[:10] }}_net"
 
+    - name: set timezone to Asia/Shanghai
+        timezone:
+          name: Asia/Shanghai
+
     - name: Set endpoint address to first auto detected IP address 
       set_fact:
         endpoint_address: "{{ ADDRS.split(',')[0] }}"

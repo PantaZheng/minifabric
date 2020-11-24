@@ -10,6 +10,7 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
 	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
 	rmsp "github.com/hyperledger/fabric-sdk-go/pkg/msp"
+	logger "github.com/sirupsen/logrus"
 	"math/rand"
 	"reflect"
 	"strconv"
@@ -124,16 +125,18 @@ func useGateway() {
 		gateway.WithUser("Admin"),
 	)
 	if err != nil {
-		fmt.Printf("Failed to connect: %v", err)
+		logger.Errorf("Failed to connect: %v", err)
+		//fmt.Printf("Failed to connect: %v", err)
 	}
 
 	if gw == nil {
-		fmt.Println("Failed to create gateway")
+		logger.Error("Failed to create gateway")
+		//fmt.Println("Failed to create gateway")
 	}
 
 	network, err := gw.GetNetwork("mychannel")
 	if err != nil {
-		fmt.Printf("Failed to get network: %v", err)
+		logger.Errorf("Failed to get network: %v", err)
 	}
 
 	var seededRand *rand.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
@@ -150,17 +153,20 @@ func useGateway() {
 			result, err := contract.SubmitTransaction("invoke", "put", uuid.New().String(),
 				strconv.Itoa(seededRand.Intn(20)))
 			if err != nil {
-				fmt.Printf("Failed to commit transaction: %v", err)
+				logger.Errorf("Failed to commit transaction: %v", err)
 			} else {
-				fmt.Println("Commit is successful")
+				logger.Info("Commit is successful")
+				//fmt.Println("Commit is successful")
 			}
 
 			fmt.Println(reflect.TypeOf(result))
-			fmt.Printf("The results is %v", result)
+			logger.Infof("The results is %v", result)
+			//fmt.Printf("The results is %v", result)
 		}()
 	}
 	wg.Wait()
-	fmt.Println("The time took is ", time.Now().Sub(start))
+	logger.Info("The time took is ", time.Now().Sub(start))
+	//fmt.Println("The time took is ", time.Now().Sub(start))
 }
 
 func main() {

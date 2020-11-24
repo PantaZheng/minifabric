@@ -9,7 +9,7 @@
 
 declare -A OPNAMES
 LINE0='imageget,certgen,netup,netstats,channelcreate,channeljoin,anchorupdate,'
-LINE1='profilegen,ccinstall,ccapprove,cccommit,ccinstantiate,discover'
+LINE1='profilegen,ccinstall,ccapprove,cccommit,ccinstantiate,discover,explorerup,apprun'
 OPNAMES=([up]="$LINE0$LINE1" [netup]='imageget,certgen,netup,netstats' \
   [restart]='netdown,netup' [generate]='certrem,certgen' [configmerge]='configmerge' \
   [orgjoin]='channelquery,configmerge,channelsign,channelupdate' \
@@ -111,7 +111,7 @@ function doOp() {
   -e "CC_PARAMETERS=$CC_PARAMETERS"  -e "EXPOSE_ENDPOINTS=$EXPOSE_ENDPOINTS"          \
   -e "ADDRS=$ADDRS" -e "CURRENT_ORG=$CURRENT_ORG" -e "BLOCK_NUMBER=$BLOCK_NUMBER"     \
   -e "TRANSIENT_DATA=$TRANSIENT_DATA" -e "CC_PRIVATE=$CC_PRIVATE"                     \
-  -e "CC_POLICY=$CC_POLICY" -e "CC_INIT_REQUIRED=$CC_INIT_REQUIRED" fabops.yaml
+  -e "CC_POLICY=$CC_POLICY" -e "CC_INIT_REQUIRED=$CC_INIT_REQUIRED" -vv fabops.yaml
 }
 
 funcparams='optionverify'

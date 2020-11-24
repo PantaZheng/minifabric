@@ -2,3 +2,9 @@
 vars/*
 *.retry
 .vscode
+.history
+.idea
+*/vendor
+*/*/vendor
+*/*/*/vendor
+*.tar.gz
