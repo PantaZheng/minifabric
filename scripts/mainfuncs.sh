@@ -91,15 +91,20 @@ function doDefaults() {
     cp envsettings vars/envsettings
   fi
   source ./vars/envsettings
+  # shellcheck disable=SC2068
   for value in ${params[@]}; do
     if [ -z ${!value+x} ]; then
+      # shellcheck disable=SC2140
       tt="$value=$"XX_"$value"
       eval "$tt"
     fi
   done
   echo "#!/bin/bash"> ./vars/envsettings
+  # shellcheck disable=SC2068
   for value in ${params[@]}; do
-    echo 'declare XX_'$value="'"${!value}"'" >> ./vars/envsettings
+    # shellcheck disable=SC2027
+    # shellcheck disable=SC2140
+    echo 'declare XX_'"$value"="'""${!value}""'" >> ./vars/envsettings
   done
 }
 
@@ -117,17 +122,18 @@ function doOp() {
 funcparams='optionverify'
 
 function isValidateCMD() {
-  if [ -z $MODE ] || [[ '-h' == "$MODE" ]] || [[ '--help' == "$MODE" ]]; then
+  if [ -z "$MODE" ] || [[ '-h' == "$MODE" ]] || [[ '--help' == "$MODE" ]]; then
     printHelp
     exit
   fi
   readarray -td, cmds < <(printf '%s' "$MODE")
   for i in "${cmds[@]}"; do
     key=$(echo "${i,,}"|xargs)
-    if  [ ! -z "${OPNAMES[$key]}" ]; then
+    if  [ -n "${OPNAMES[$key]}" ]; then
       funcparams="$funcparams","${OPNAMES[$key]}"
     else
-      echo "'"${i}"'"' is a not supported command!'
+      # shellcheck disable=SC2027
+      echo "'""${i}""'"' is a not supported command!'
       exit 1
     fi
   done
@@ -145,5 +151,5 @@ function getRealRootDir() {
 
 function startMinifab() {
   export ANSIBLE_STDOUT_CALLBACK=$RUN_OUTPUT
-  time doOp $funcparams
+  time doOp "$funcparams"
 }
