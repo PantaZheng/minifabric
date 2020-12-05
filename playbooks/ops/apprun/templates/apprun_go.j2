@@ -7,11 +7,11 @@ cd /go/src/github.com/app
 if [ -f 'go.mod' ] && [ ! -d 'vendor' ]; then
   export GO111MODULE=on
   go mod vendor
-  export GO111MODULE=off
 fi
 export GO111MODULE=off
 export ROOTPATH=/vars/keyfiles
-cp /vars/profiles/{{ CHANNEL_NAME}}_connection_for_gosdk.json connection.json
+{#cp /vars/profiles/{{ CHANNEL_NAME}}_connection_for_gosdk.json connection.json#}
+cp /vars/profiles/{{ CHANNEL_NAME}}_connection_for_gosdk.yaml connection.yaml
 mkdir -p wallets
 cp /vars/profiles/vscode/wallets/{{ CURRENT_ORG}}/Admin.id wallets/Admin.id
 go run main.go

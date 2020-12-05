@@ -185,7 +185,8 @@ func useWalletGateway() {
 	}
 
 	gw, err := gateway.Connect(
-		gateway.WithConfig(config.FromFile("./connection.json")),
+		//gateway.WithConfig(config.FromFile("./connection.json")),
+		gateway.WithConfig(config.FromFile("./connection.yaml")),
 		gateway.WithIdentity(wallet, "Admin"),
 	)
 

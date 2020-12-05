@@ -9,7 +9,7 @@
 
 declare -A OPNAMES
 LINE0='imageget,certgen,netup,netstats,channelcreate,channeljoin,anchorupdate,'
-LINE1='profilegen,ccinstall,ccapprove,cccommit,ccinstantiate,discover,explorerup,apprun'
+LINE1='profilegen,ccinstall,ccapprove,cccommit,ccinstantiate,discover,explorerup'
 OPNAMES=([up]="$LINE0$LINE1" [netup]='imageget,certgen,netup,netstats' \
   [restart]='netdown,netup' [generate]='certrem,certgen' [configmerge]='configmerge' \
   [orgjoin]='channelquery,configmerge,channelsign,channelupdate' \

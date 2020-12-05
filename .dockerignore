@@ -3,3 +3,4 @@ vars
 *.retry
 .*
 Dockerfile*
+node_modules
