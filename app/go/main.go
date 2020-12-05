@@ -28,7 +28,8 @@ const (
 
 func doEnroll() {
 	//Load configuration from connection profile
-	cnfg := config.FromFile("./connection.json")
+	//cnfg := config.FromFile("./connection.json")
+	cnfg := config.FromFile("./connection.yaml")
 	sdk, err := fabsdk.New(cnfg)
 	if err != nil {
 		fmt.Printf("Failed to create new SDK: %s", err)
@@ -93,7 +94,8 @@ func doEnroll() {
 }
 
 func useClientExecute(index int) {
-	cnfg := config.FromFile("./connection.json")
+// 	cnfg := config.FromFile("./connection.json")
+    cnfg := config.FromFile("./connection.yaml")
 	fmt.Println(reflect.TypeOf(cnfg))
 	sdk, err := fabsdk.New(cnfg)
 	if err != nil {
