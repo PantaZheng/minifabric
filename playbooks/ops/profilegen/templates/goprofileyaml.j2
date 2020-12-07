@@ -2,7 +2,6 @@
 # ROOTPATH should be set to the absolute path of crypto material starting directory
 # for example: export ROOTPATH=/home/ubuntu/mywork/vars/keyfiles
 name: {{ NETNAME }}
-x-type: hlfv-{{ fabric.release }}
 version: 1.0.0
 client:
 {% set gopeer=allpeers|random %}
@@ -28,12 +27,14 @@ organizations:
     mspid: {{ org.split('.')|join('-') }}
     cryptoPath: {{ orgtype }}Organizations/{{ org }}/users/{username}@{{
         org}}/msp
-{% if orgtype == 'peer' %}
+{% if orgtype == 'peer'%}
+    orderers: []
     peers:
 {%   for peer in allpeers|selectattr('org', 'equalto', org)|list %}
     - {{ peer.fullname }}
 {%   endfor %}
 {% else %}
+    peers: []
     orderers:
 {%   for orderer in allorderers|selectattr('org', 'equalto', org)|list %}
 {%     set orgtype = 'orderer' %}
