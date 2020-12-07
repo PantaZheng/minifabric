@@ -1,0 +1,21 @@
+caliper:
+    auth:
+        prometheuspush:
+            username:
+            password:
+        # Prometheus Server
+        prometheus:
+            username:
+            password:
+    bind:
+        sut: fabric:{{ sdk_release }}
+    workspace: /hyperledger/caliper/workspace
+    benchconfig: benchmarkconfig.yaml
+    networkconfig: networkconfig.yaml
+    flow:
+        only:
+            test: true
+    fabric:
+        gateway:
+            enabled: true
+            localhost: false

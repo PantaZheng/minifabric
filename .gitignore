@@ -1,10 +1,9 @@
 # Byte-compiled / optimized / DLL files
-vars/*
 *.retry
 .vscode
 .history
 .idea
-*/vendor
-*/*/vendor
-*/*/*/vendor
+vars/
+vendor/
+node_modules/
 *.tar.gz
