@@ -71,4 +71,4 @@ PRECONDITIONS:
 LANGUAGEENVS:
   java: 'java:latest'
   go: 'golang:latest'
-  node: 'node:12.13.1-alpine3.10'
+  node: 'node:12.20.0-alpine3.12'

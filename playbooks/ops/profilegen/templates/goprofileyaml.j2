@@ -9,20 +9,6 @@ client:
   organization: {{ gopeer.org }}
   logging:
     level: info
-  cryptoconfig:
-    path: "${ROOTPATH}"
-  credentialStore:
-    path: /tmp/state-store
-    cryptoStore:
-      path: /tmp/msp
-  BCCSP:
-    security:
-      enabled: true
-      default:
-        provider: SW
-      hashAlgorithm: SHA2
-      softVerify: true
-      level: 256
 
 channels:
   {{ CHANNEL_NAME }}:
@@ -32,7 +18,7 @@ channels:
 {% endfor %}
     peers:
 {% for peer in allpeers %}
-      {{ peer.fullname }}
+      {{ peer.fullname }}:
 {% endfor %}
 
 organizations:

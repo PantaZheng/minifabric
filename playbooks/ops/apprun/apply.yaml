@@ -1,6 +1,7 @@
 ---
 - name: Create apprun script
   template:
+#    src: "{{ pjroot }}/playbooks/ops/apprun/templates/apprun_{{CC_LANGUAGE}}.j2"
     src: "{{ pjroot }}/playbooks/ops/apprun/templates/apprun_{{CC_LANGUAGE}}.j2"
     dest: "{{ pjroot }}/vars/run/apprun.sh"
     mode: +x
@@ -9,8 +10,9 @@
   command: >-
     docker run --network {{ NETNAME }} --name apprun --hostname apprun --rm
     -v /var/run/docker.sock:/var/run/docker.sock
-    -v {{ hostroot }}/vars:/vars
+    -v {{ hostroot }}/vars/profiles:/vars/profiles
     -v {{ hostroot }}/vars/app/{{CC_LANGUAGE}}:/go/src/github.com/app
+    -v {{ hostroot }}/vars/run/apprun.sh:/vars/run/apprun.sh
     --entrypoint /vars/run/apprun.sh
     {{ LANGUAGEENVS[CC_LANGUAGE] }}
   register: runstates
