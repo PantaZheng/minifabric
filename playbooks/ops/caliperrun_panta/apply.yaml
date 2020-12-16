@@ -43,6 +43,7 @@
         docker run --network {{ NETNAME }} --name calipertester --hostname calipertester
         --entrypoint /run/caliperbind.sh
         -v {{ hostroot }}/vars/run:/run
+        -e TZ="Asia/Shanghai"
         hyperledger/caliper:{{ caliper_release }}
 
     - name: Save the container as an image

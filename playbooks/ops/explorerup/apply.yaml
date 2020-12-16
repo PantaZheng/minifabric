@@ -31,6 +31,7 @@
     -v explorerdb.{{ NETNAME }}:/var/lib/postgresql/data
     --health-cmd "pg_isready -h localhost -p 5432 -q -U postgres"
     --health-interval "30s" --health-timeout "10s" --health-retries 5
+    -e TZ="Asia/Shanghai"
     hyperledger/explorer-db:1.1.3
 
 - name: set two values
@@ -59,6 +60,7 @@
       -e "LOG_LEVEL_CONSOLE=debug"
       -e "LOG_CONSOLE_STDOUT=true"
       -e "DISCOVERY_AS_LOCALHOST=false"
+      -e TZ="Asia/Shanghai"
       -p {{ explorer_port }}:8080
       -v explorerwallet.{{ NETNAME }}:/opt/wallet
       -v {{hostroot}}/vars/explorer/{{ CHANNEL_NAME}}_config.json:/opt/explorer/app/platform/fabric/config.json

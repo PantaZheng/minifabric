@@ -17,6 +17,7 @@
     -v {{ hostroot }}/vars/profiles:/vars/profiles
     -v {{ hostroot }}/vars/app/{{ APP_LANGUAGE }}:/go/src/github.com/app
     -v {{ hostroot }}/vars/run/apprun.sh:/vars/run/apprun.sh
+    -e TZ="Asia/Shanghai"
     --entrypoint /vars/run/apprun.sh
     {{ LANGUAGEENVS[APP_LANGUAGE] }}
   register: runstates

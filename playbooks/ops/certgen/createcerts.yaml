@@ -62,6 +62,7 @@
     docker run --rm --name tools
     -v /var/run/:/host/var/run
     -v {{ hostroot}}/vars:/etc/hyperledger/fabric
+    -e TZ="Asia/Shanghai"
     hyperledger/fabric-tools:{{ fabric.release }} /etc/hyperledger/fabric/run/certtxgen.sh
 
 - name: Package all the certs to one file

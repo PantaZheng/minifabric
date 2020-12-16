@@ -10,6 +10,7 @@
       -p {{ portainer_port }}:9000
       -v /var/run/docker.sock:/var/run/docker.sock
       -v portainer.{{ NETNAME }}:/data
+      -e TZ="Asia/Shanghai"
       portainer/portainer-ce:2.0.0-alpine
 
 - name: "Explorer endpoint for {{ NETNAME }} "
