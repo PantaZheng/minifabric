@@ -186,6 +186,13 @@ func useWalletGateway() {
 		os.Exit(1)
 	}
 
+	file, err := os.OpenFile("golang.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err == nil {
+	 logger.SetOutput(file)
+	} else {
+	 logger.Info("Failed to log to file, using default stderr")
+	}
+
 	gw, err := gateway.Connect(
 		//gateway.WithConfig(config.FromFile("./connection.json")),
 		gateway.WithConfig(config.FromFile("./connection.yaml")),
@@ -207,14 +214,18 @@ func useWalletGateway() {
 		logger.Errorf("Failed to get network: %v", err)
 	}
 
-	var seededRand *rand.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
+	nowTime := time.Now().UnixNano()
+	logger.Info("time is %v", nowTime)
+	var seededRand = rand.New(rand.NewSource(nowTime))
+
 	contract := network.GetContract("samplecc")
 	uuid.SetRand(nil)
 
 	var wg sync.WaitGroup
 	start := time.Now()
-	for i := 1; i <= 10; i++ {
+	for i := 0; i < 10; i++ {
 		wg.Add(1)
+		count := i
 		go func() {
 			defer wg.Done()
 			seededRand.Intn(20)
@@ -223,12 +234,11 @@ func useWalletGateway() {
 			if err != nil {
 				logger.Errorf("Failed to commit transaction: %v", err)
 			} else {
-				logger.Info("Commit is successful")
+				logger.Infof("Tx %v submitted, result is %v", count, result)
+				//logger.Infof("The results is %v", result)
 				//fmt.Println("Commit is successful")
 			}
-
-			fmt.Println(reflect.TypeOf(result))
-			logger.Infof("The results is %v", result)
+			//fmt.Println(reflect.TypeOf(result))
 			//fmt.Printf("The results is %v", result)
 		}()
 	}
