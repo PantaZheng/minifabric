@@ -29,7 +29,7 @@ const (
 func doEnroll() {
 	//Load configuration from connection profile
 	//cnfg := config.FromFile("./connection.json")
-	cnfg := config.FromFile("./connection.yaml")
+	cnfg := config.FromFile("../profile/connection.yaml")
 	sdk, err := fabsdk.New(cnfg)
 	if err != nil {
 		fmt.Printf("Failed to create new SDK: %s", err)
@@ -198,12 +198,10 @@ func useWalletGateway() {
 		gateway.WithConfig(config.FromFile("./connection.yaml")),
 		gateway.WithIdentity(wallet, "Admin"),
 	)
-
 	if err != nil {
 		logger.Errorf("Failed to connect: %v", err)
 		//fmt.Printf("Failed to connect: %v", err)
 	}
-
 	if gw == nil {
 		logger.Error("Failed to create gateway")
 		//fmt.Println("Failed to create gateway")
@@ -238,7 +236,7 @@ func useWalletGateway() {
 				//logger.Infof("The results is %v", result)
 				//fmt.Println("Commit is successful")
 			}
-			//fmt.Println(reflect.TypeOf(result))
+			fmt.Println(reflect.TypeOf(result))
 			//fmt.Printf("The results is %v", result)
 		}()
 	}

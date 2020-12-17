@@ -24,15 +24,9 @@ logger.level = "all"
 async function main() {
     try {
         // load the network configuration
-        const ccpPath = path.resolve(__dirname, '.', 'connection.yaml');
-        const ccp = YAML.parse(fs.readFileSync(ccpPath, 'utf8'))
-
-
+        const ccp = YAML.parse(fs.readFileSync('./connection.yaml', 'utf8'))
         // Create a new file system based wallet for managing identities.
-        const walletPath = path.join('/vars/profiles/vscode/wallets', 'org0.example.com');
-        const wallet = await Wallets.newFileSystemWallet(walletPath);
-        logger.info(`Wallet path: ${walletPath}`);
-
+        const wallet = await Wallets.newFileSystemWallet('./wallets');
         // Check to see if we've already enrolled the admin user.
         const identity = await wallet.get('Admin');
         if (!identity) {
@@ -52,35 +46,34 @@ async function main() {
         logger.info(`Time is ${nowTime.toString()}`)
         const seededRand = seedrandom(nowTime)
 
-        // let wg = new WaitGroup()
-        // let counter = []
-        // for (let i = 0; i < 10; i++) {
-        //     wg.add(1)
-        //     const uid = uuid.v4().toString() + i.toString();
-        //     const sid = seededRand.int32();
-        //     counter.push(
-        //         contract.submitTransaction('invoke', 'put',
-        //             uid, sid).then((response)=>{
-        //             return {uid: uid,sid:sid, message: response.toJSON().data}
-        //         })
-        //     )
-        //     wg.done()
-        // }
-        //
-        // logger.info("填装完毕")
-        // let results = await Promise.all(counter)
-        // logger.info(results)
-        // await wg.wait()
-        // logger.warn(`promise.all time took is ${Date.now()-nowTime}`)
-
+        let wg = new WaitGroup()
+        let counter = []
         for (let i = 0; i < 10; i++) {
+            wg.add(1)
             const uid = uuid.v4().toString() + i.toString();
             const sid = seededRand.int32();
-            let result = await contract.submitTransaction('invoke', 'put',
-                uid, sid)
-            logger.info({uid: uid,sid:sid, message: result.toJSON().data})
+            counter.push(
+                contract.submitTransaction('invoke', 'put',
+                    uid, sid).then((response)=>{
+                    return {uid: uid,sid:sid, message: response.toJSON().data}
+                })
+            )
+            wg.done()
         }
-        logger.warn(`loop async time took is ${Date.now()-nowTime}`)
+
+        let results = await Promise.all(counter)
+        logger.info(results)
+        await wg.wait()
+        logger.warn(`promise.all time took is ${Date.now()-nowTime}`)
+
+        // for (let i = 0; i < 10; i++) {
+        //     const uid = uuid.v4().toString() + i.toString();
+        //     const sid = seededRand.int32();
+        //     let result = await contract.submitTransaction('invoke', 'put',
+        //         uid, sid)
+        //     logger.info({uid: uid, sid: sid, message: result.toJSON().data})
+        // }
+        // logger.warn(`loop async time took is ${Date.now() - nowTime}`)
         // Disconnect from the gateway.
         await gateway.disconnect();
     } catch (error) {

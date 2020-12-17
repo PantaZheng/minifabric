@@ -1,10 +1,10 @@
 #!/bin/sh
 # scripts to start the node application against the network
-cd /go/src/github.com/app
+
+cd {{ APP_DIR }}
+
 if [ -f 'package.json' ] && [ ! -d 'node_modules' ]; then
     yarn install
 fi
 
-{#cp /vars/profiles/{{ CHANNEL_NAME}}_connection_for_nodesdk.json connection.json#}
-cp /vars/profiles/{{ CHANNEL_NAME}}_connection_for_gosdk.yaml connection.yaml
 node main.js
