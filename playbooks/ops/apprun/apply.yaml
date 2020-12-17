@@ -10,6 +10,10 @@
     dest: "{{ pjroot }}/vars/run/apprun.sh"
     mode: +x
 
+- name: Change var file permission
+  command: >-
+    chown -R 1000:1000 {{ pjroot }}/vars/app
+
 - name: Run the chaincode application
   command: >-
     docker run --network {{ NETNAME }} --name apprun --hostname apprun --rm
