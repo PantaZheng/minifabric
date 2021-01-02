@@ -11,18 +11,18 @@ declare -A OPNAMES
 LINE0='imageget,certgen,netup,netstats,channelcreate,channeljoin,anchorupdate,'
 #LINE1='profilegen,ccinstall,ccapprove,cccommit,ccinstantiate,discover,explorerup'
 LINE1='profilegen,ccinstall,ccapprove,cccommit,ccinstantiate,discover'
-OPNAMES=([up]="$LINE0$LINE1" [netup]='imageget,certgen,netup,netstats' \
-  [restart]='netdown,netup' [generate]='certrem,certgen' [configmerge]='configmerge' \
-  [orgjoin]='channelquery,configmerge,channelsign,channelupdate' \
-  [cleanup]='netdown,filerem' [stats]='netstats' [apprun]='apprun' \
-  [down]='netdown' [install]='ccinstall' [approve]='ccapprove' \
-  [instantiate]='ccinstantiate' [initialize]='ccinstantiate' \
-  [commit]='cccommit' [invoke]='ccinvoke' [create]='channelcreate' \
-  [query]='ccquery' [join]='channeljoin' [blockquery]='blockquery' \
-  [channelquery]='channelquery' [profilegen]='profilegen' [caliperrun]='caliperrun' \
-  [channelsign]='channelsign' [channelupdate]='channelupdate' \
-  [portainerup]='portainerup' [portainerdown]='portainerdown' \
-  [anchorupdate]='anchorupdate' [explorerup]='explorerup' [explorerdown]='explorerdown' \
+OPNAMES=([up]="$LINE0$LINE1" [netup]='imageget,certgen,netup,netstats'
+  [restart]='netdown,netup' [generate]='certrem,certgen' [configmerge]='configmerge'
+  [orgjoin]='channelquery,configmerge,channelsign,channelupdate'
+  [cleanup]='netdown,filerem' [stats]='netstats' [apprun]='apprun'
+  [down]='netdown' [install]='ccinstall' [approve]='ccapprove'
+  [instantiate]='ccinstantiate' [initialize]='ccinstantiate'
+  [commit]='cccommit' [invoke]='ccinvoke' [create]='channelcreate'
+  [query]='ccquery' [join]='channeljoin' [blockquery]='blockquery'
+  [channelquery]='channelquery' [profilegen]='profilegen' [caliperrun]='caliperrun'
+  [channelsign]='channelsign' [channelupdate]='channelupdate'
+  [portainerup]='portainerup' [portainerdown]='portainerdown'
+  [anchorupdate]='anchorupdate' [explorerup]='explorerup' [explorerdown]='explorerdown'
   [nodeimport]='nodeimport' [discover]='discover' [imageget]='imageget' [update]='update')
 
 # Print the usage message
@@ -49,7 +49,7 @@ function printHelp() {
   echo "      - 'blockquery'  - do channel block query and produce a channel tx json file"
   echo "      - 'channelquery'  - do channel query and produce a channel configuration json file"
   echo "      - 'channelsign'  - do channel config update signoff"
-  echo "      - 'channelupdate'  - do channel update with a given new channel configuration json file" 
+  echo "      - 'channelupdate'  - do channel update with a given new channel configuration json file"
   echo "      - 'anchorupdate'  - do channel update which makes all peer nodes anchors for the all orgs"
   echo "      - 'nodeimport' - import external node certs and endpoints"
   echo "      - 'discover' - discover channel endorsement policy"
@@ -85,8 +85,8 @@ function printHelp() {
 }
 
 function doDefaults() {
-  declare -a params=("CHANNEL_NAME" "CC_LANGUAGE" "IMAGETAG" "BLOCK_NUMBER" "CC_VERSION" \
-    "CC_NAME" "DB_TYPE" "CC_PARAMETERS" "EXPOSE_ENDPOINTS" "CURRENT_ORG" "TRANSIENT_DATA" \
+  declare -a params=("CHANNEL_NAME" "CC_LANGUAGE" "IMAGETAG" "BLOCK_NUMBER" "CC_VERSION"
+    "CC_NAME" "DB_TYPE" "CC_PARAMETERS" "EXPOSE_ENDPOINTS" "CURRENT_ORG" "TRANSIENT_DATA"
     "CC_PRIVATE" "CC_POLICY" "CC_INIT_REQUIRED" "RUN_OUTPUT")
   if [ ! -f "./vars/envsettings" ]; then
     cp envsettings vars/envsettings
@@ -100,25 +100,25 @@ function doDefaults() {
       eval "$tt"
     fi
   done
-  echo "#!/bin/bash"> ./vars/envsettings
+  echo "#!/bin/bash" >./vars/envsettings
   # shellcheck disable=SC2068
   for value in ${params[@]}; do
     # shellcheck disable=SC2027
     # shellcheck disable=SC2140
-    echo 'declare XX_'"$value"="'""${!value}""'" >> ./vars/envsettings
+    echo 'declare XX_'"$value"="'""${!value}""'" >>./vars/envsettings
   done
 }
 
 function doOp() {
-  ansible-playbook -i hosts                                                           \
-  -e "mode=$1" -e "hostroot=$hostroot" -e "CC_LANGUAGE=$CC_LANGUAGE"                  \
-  -e "DB_TYPE=$DB_TYPE" -e "CHANNEL_NAME=$CHANNEL_NAME" -e "CC_NAME=$CC_NAME"         \
-  -e "CC_VERSION=$CC_VERSION" -e "CHANNEL_NAME=$CHANNEL_NAME" -e "IMAGETAG=$IMAGETAG" \
-  -e "CC_PARAMETERS=$CC_PARAMETERS"  -e "EXPOSE_ENDPOINTS=$EXPOSE_ENDPOINTS"          \
-  -e "ADDRS=$ADDRS" -e "CURRENT_ORG=$CURRENT_ORG" -e "BLOCK_NUMBER=$BLOCK_NUMBER"     \
-  -e "TRANSIENT_DATA=$TRANSIENT_DATA" -e "CC_PRIVATE=$CC_PRIVATE"                     \
-  -e "CC_POLICY=$CC_POLICY" -e "CC_INIT_REQUIRED=$CC_INIT_REQUIRED" -vv               \
-  fabops.yaml
+  ansible-playbook -i hosts \
+    -e "mode=$1" -e "hostroot=$hostroot" -e "CC_LANGUAGE=$CC_LANGUAGE" \
+    -e "DB_TYPE=$DB_TYPE" -e "CHANNEL_NAME=$CHANNEL_NAME" -e "CC_NAME=$CC_NAME" \
+    -e "CC_VERSION=$CC_VERSION" -e "CHANNEL_NAME=$CHANNEL_NAME" -e "IMAGETAG=$IMAGETAG" \
+    -e "CC_PARAMETERS=$CC_PARAMETERS" -e "EXPOSE_ENDPOINTS=$EXPOSE_ENDPOINTS" \
+    -e "ADDRS=$ADDRS" -e "CURRENT_ORG=$CURRENT_ORG" -e "BLOCK_NUMBER=$BLOCK_NUMBER" \
+    -e "TRANSIENT_DATA=$TRANSIENT_DATA" -e "CC_PRIVATE=$CC_PRIVATE" \
+    -e "CC_POLICY=$CC_POLICY" -e "CC_INIT_REQUIRED=$CC_INIT_REQUIRED" -vv \
+    fabops.yaml
 }
 
 funcparams='optionverify'
@@ -130,8 +130,8 @@ function isValidateCMD() {
   fi
   readarray -td, cmds < <(printf '%s' "$MODE")
   for i in "${cmds[@]}"; do
-    key=$(echo "${i,,}"|xargs)
-    if  [ -n "${OPNAMES[$key]}" ]; then
+    key=$(echo "${i,,}" | xargs)
+    if [ -n "${OPNAMES[$key]}" ]; then
       funcparams="$funcparams","${OPNAMES[$key]}"
     else
       # shellcheck disable=SC2027

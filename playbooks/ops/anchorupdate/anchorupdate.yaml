@@ -8,11 +8,10 @@
 
 - name: Create anchor update script
   template:
-    src: "{{ pjroot }}/playbooks/ops/templates/anchorupdate.j2"
+    src: "{{ pjroot }}/playbooks/ops/templates/anchorupdate.sh.j2"
     dest: "{{ pjroot }}/vars/run/anchorupdate.{{ updatingorg }}.sh"
     mode: +x
 
 - name: Run the anchor update script on cli container
   command: >-
     docker exec {{ CLINAME }} /vars/run/anchorupdate.{{ updatingorg }}.sh
-

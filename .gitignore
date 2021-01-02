@@ -10,3 +10,4 @@ node_modules/
 playbooks/ops/certgen/v3.ext
 *.lock
 app/callback/package-lock.json
+playbooks/ops/certgen/v3.ext
