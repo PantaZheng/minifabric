@@ -1,7 +1,6 @@
 'use strict';
 
 const { WorkloadModuleBase } = require('@hyperledger/caliper-core');
-
 class MyWorkload extends WorkloadModuleBase {
     constructor() {
         super();
@@ -33,3 +32,4 @@ function createWorkloadModule() {
 }
 
 module.exports.createWorkloadModule = createWorkloadModule;
+
