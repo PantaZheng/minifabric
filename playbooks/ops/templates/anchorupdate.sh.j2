@@ -4,7 +4,7 @@ cp $FABRIC_CFG_PATH/core.yaml /vars/core.yaml
 cd /vars
 export FABRIC_CFG_PATH=/vars
 
-{% include "envsetting.j2" %}
+{% include "envsetting.sh.j2" %}
 
 configtxgen -profile OrgChannel -outputAnchorPeersUpdate \
   ./${CORE_PEER_LOCALMSPID}_Anchor.tx -channelID {{ CHANNEL_NAME }} -asOrg ${CORE_PEER_LOCALMSPID}

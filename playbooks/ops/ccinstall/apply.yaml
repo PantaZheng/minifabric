@@ -24,7 +24,7 @@
 
 - name: Create chaincode collection config for private data
   template:
-    src: "{{ pjroot }}/playbooks/ops/templates/collection_config.j2"
+    src: "{{ pjroot }}/playbooks/ops/templates/collection_config.json.j2"
     dest: "{{ pjroot }}/vars/{{CC_NAME}}_collection_config.json"
     force: no
   when: CC_PRIVATE == 'true'

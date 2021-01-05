@@ -9,7 +9,7 @@
 
 - name: Create channel block query script
   template:
-    src: "{{ pjroot }}/playbooks/ops/templates/blockquery.j2"
+    src: "{{ pjroot }}/playbooks/ops/templates/blockquery.sh.j2"
     dest: "{{ pjroot }}/vars/run/blockquery.sh"
     mode: +x
 

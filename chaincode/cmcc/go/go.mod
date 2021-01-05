@@ -1,11 +1,14 @@
-module module
+module cmcc
 
 go 1.12
 
 require (
+	github.com/Knetic/govaluate v3.0.0+incompatible // indirect
+	github.com/Shopify/sarama v1.27.2 // indirect
 	github.com/fsouza/go-dockerclient v1.6.6 // indirect
 	github.com/golang/protobuf v1.3.3
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.2 // indirect
+	github.com/hashicorp/go-version v1.2.1 // indirect
 	github.com/hyperledger/fabric v1.4.1
 	github.com/hyperledger/fabric-amcl v0.0.0-20200424173818-327c9e2cf77a // indirect
 	github.com/miekg/pkcs11 v1.0.3 // indirect

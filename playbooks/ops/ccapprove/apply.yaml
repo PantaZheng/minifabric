@@ -11,7 +11,7 @@
 
   - name: Create channel sign off script
     template:
-      src: "{{ pjroot }}/playbooks/ops/templates/ccapprove.j2"
+      src: "{{ pjroot }}/playbooks/ops/templates/ccapprove.sh.j2"
       dest: "{{ pjroot }}/vars/run/ccapprove.sh"
       mode: +x
 

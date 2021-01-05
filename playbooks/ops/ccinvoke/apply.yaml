@@ -16,7 +16,7 @@
 
 - name: Create chaincode invocation script
   template:
-    src: "{{ pjroot }}/playbooks/ops/templates/ccinvoke.j2"
+    src: "{{ pjroot }}/playbooks/ops/templates/ccinvoke.sh.j2"
     dest: "{{ pjroot }}/vars/run/ccinvoke.sh"
     mode: +x
 

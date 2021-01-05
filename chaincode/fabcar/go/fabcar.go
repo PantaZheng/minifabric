@@ -1,141 +1,154 @@
 /*
-Copyright 2020 IBM All Rights Reserved.
-
 SPDX-License-Identifier: Apache-2.0
 */
 
 package main
 
 import (
-	"errors"
+	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"os"
-	"path/filepath"
+	"strconv"
 
-	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
-	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
+	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
 
-func main() {
-	os.Setenv("DISCOVERY_AS_LOCALHOST", "true")
-	wallet, err := gateway.NewFileSystemWallet("wallet")
-	if err != nil {
-		fmt.Printf("Failed to create wallet: %s\n", err)
-		os.Exit(1)
+// SmartContract provides functions for managing a car
+type SmartContract struct {
+	contractapi.Contract
+}
+
+// Car describes basic details of what makes up a car
+type Car struct {
+	Make   string `json:"make"`
+	Model  string `json:"model"`
+	Colour string `json:"colour"`
+	Owner  string `json:"owner"`
+}
+
+// QueryResult structure used for handling result of query
+type QueryResult struct {
+	Key    string `json:"Key"`
+	Record *Car
+}
+
+// InitLedger adds a base set of cars to the ledger
+func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) error {
+	cars := []Car{
+		{Make: "Toyota", Model: "Prius", Colour: "blue", Owner: "Tomoko"},
+		{Make: "Ford", Model: "Mustang", Colour: "red", Owner: "Brad"},
+		{Make: "Hyundai", Model: "Tucson", Colour: "green", Owner: "Jin Soo"},
+		{Make: "Volkswagen", Model: "Passat", Colour: "yellow", Owner: "Max"},
+		{Make: "Tesla", Model: "S", Colour: "black", Owner: "Adriana"},
+		{Make: "Peugeot", Model: "205", Colour: "purple", Owner: "Michel"},
+		{Make: "Chery", Model: "S22L", Colour: "white", Owner: "Aarav"},
+		{Make: "Fiat", Model: "Punto", Colour: "violet", Owner: "Pari"},
+		{Make: "Tata", Model: "Nano", Colour: "indigo", Owner: "Valeria"},
+		{Make: "Holden", Model: "Barina", Colour: "brown", Owner: "Shotaro"},
 	}
 
-	if !wallet.Exists("appUser") {
-		err = populateWallet(wallet)
+	for i, car := range cars {
+		carAsBytes, _ := json.Marshal(car)
+		err := ctx.GetStub().PutState("CAR"+strconv.Itoa(i), carAsBytes)
+
 		if err != nil {
-			fmt.Printf("Failed to populate wallet contents: %s\n", err)
-			os.Exit(1)
+			return fmt.Errorf("failed to put to world state. %s", err.Error())
 		}
 	}
 
-	ccpPath := filepath.Join(
-		"..",
-		"..",
-		"test-network",
-		"organizations",
-		"peerOrganizations",
-		"org1.example.com",
-		"connection-org1.yaml",
-	)
-
-	gw, err := gateway.Connect(
-		gateway.WithConfig(config.FromFile(filepath.Clean(ccpPath))),
-		gateway.WithIdentity(wallet, "appUser"),
-	)
-	if err != nil {
-		fmt.Printf("Failed to connect to gateway: %s\n", err)
-		os.Exit(1)
-	}
-	defer gw.Close()
-
-	network, err := gw.GetNetwork("mychannel")
-	if err != nil {
-		fmt.Printf("Failed to get network: %s\n", err)
-		os.Exit(1)
-	}
-
-	contract := network.GetContract("fabcar")
-
-	result, err := contract.EvaluateTransaction("queryAllCars")
-	if err != nil {
-		fmt.Printf("Failed to evaluate transaction: %s\n", err)
-		os.Exit(1)
-	}
-	fmt.Println(string(result))
-
-	result, err = contract.SubmitTransaction("createCar", "CAR10", "VW", "Polo", "Grey", "Mary")
-	if err != nil {
-		fmt.Printf("Failed to submit transaction: %s\n", err)
-		os.Exit(1)
-	}
-	fmt.Println(string(result))
-
-	result, err = contract.EvaluateTransaction("queryCar", "CAR10")
-	if err != nil {
-		fmt.Printf("Failed to evaluate transaction: %s\n", err)
-		os.Exit(1)
-	}
-	fmt.Println(string(result))
-
-	_, err = contract.SubmitTransaction("changeCarOwner", "CAR10", "Archie")
-	if err != nil {
-		fmt.Printf("Failed to submit transaction: %s\n", err)
-		os.Exit(1)
-	}
-
-	result, err = contract.EvaluateTransaction("queryCar", "CAR10")
-	if err != nil {
-		fmt.Printf("Failed to evaluate transaction: %s\n", err)
-		os.Exit(1)
-	}
-	fmt.Println(string(result))
+	return nil
 }
 
-func populateWallet(wallet *gateway.Wallet) error {
-	credPath := filepath.Join(
-		"..",
-		"..",
-		"test-network",
-		"organizations",
-		"peerOrganizations",
-		"org1.example.com",
-		"users",
-		"User1@org1.example.com",
-		"msp",
-	)
+// CreateCar adds a new car to the world state with given details
+func (s *SmartContract) CreateCar(ctx contractapi.TransactionContextInterface, carNumber string, make string, model string, colour string, owner string) error {
+	car := Car{
+		Make:   make,
+		Model:  model,
+		Colour: colour,
+		Owner:  owner,
+	}
 
-	certPath := filepath.Join(credPath, "signcerts", "cert.pem")
-	// read the certificate pem
-	cert, err := ioutil.ReadFile(filepath.Clean(certPath))
+	carAsBytes, _ := json.Marshal(car)
+
+	return ctx.GetStub().PutState(carNumber, carAsBytes)
+}
+
+// QueryCar returns the car stored in the world state with given id
+func (s *SmartContract) QueryCar(ctx contractapi.TransactionContextInterface, carNumber string) (*Car, error) {
+	carAsBytes, err := ctx.GetStub().GetState(carNumber)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to read from world state. %s", err.Error())
+	}
+
+	if carAsBytes == nil {
+		return nil, fmt.Errorf("%s does not exist", carNumber)
+	}
+
+	car := new(Car)
+	_ = json.Unmarshal(carAsBytes, car)
+
+	return car, nil
+}
+
+// QueryAllCars returns all cars found in world state
+func (s *SmartContract) QueryAllCars(ctx contractapi.TransactionContextInterface) ([]QueryResult, error) {
+	startKey := ""
+	endKey := ""
+
+	resultsIterator, err := ctx.GetStub().GetStateByRange(startKey, endKey)
+
+	if err != nil {
+		return nil, err
+	}
+	defer func(){
+		_ = resultsIterator.Close()
+	}()
+	//defer resultsIterator.Close()
+
+	var results []QueryResult
+
+	for resultsIterator.HasNext() {
+		queryResponse, err := resultsIterator.Next()
+
+		if err != nil {
+			return nil, err
+		}
+
+		car := new(Car)
+		_ = json.Unmarshal(queryResponse.Value, car)
+
+		queryResult := QueryResult{Key: queryResponse.Key, Record: car}
+		results = append(results, queryResult)
+	}
+
+	return results, nil
+}
+
+// ChangeCarOwner updates the owner field of car with given id in world state
+func (s *SmartContract) ChangeCarOwner(ctx contractapi.TransactionContextInterface, carNumber string, newOwner string) error {
+	car, err := s.QueryCar(ctx, carNumber)
+
 	if err != nil {
 		return err
 	}
 
-	keyDir := filepath.Join(credPath, "keystore")
-	// there's a single file in this dir containing the private key
-	files, err := ioutil.ReadDir(keyDir)
+	car.Owner = newOwner
+
+	carAsBytes, _ := json.Marshal(car)
+
+	return ctx.GetStub().PutState(carNumber, carAsBytes)
+}
+
+func main() {
+
+	chaincode, err := contractapi.NewChaincode(new(SmartContract))
+
 	if err != nil {
-		return err
-	}
-	if len(files) != 1 {
-		return errors.New("keystore folder should have contain one file")
-	}
-	keyPath := filepath.Join(keyDir, files[0].Name())
-	key, err := ioutil.ReadFile(filepath.Clean(keyPath))
-	if err != nil {
-		return err
+		fmt.Printf("Error create fabcar chaincode: %s", err.Error())
+		return
 	}
 
-	identity := gateway.NewX509Identity("Org1MSP", string(cert), string(key))
-
-	err = wallet.Put("appUser", identity)
-	if err != nil {
-		return err
+	if err := chaincode.Start(); err != nil {
+		fmt.Printf("Error starting fabcar chaincode: %s", err.Error())
 	}
-	return nil
 }

@@ -1,7 +1,9 @@
 {
     "name": "fabcar",
     "version": "1.0.0",
-    "description": "FabCar application implemented in TypeScript",
+    "description": "FabCar contract implemented in TypeScript",
+    "main": "dist/index.js",
+    "typings": "dist/index.d.ts",
     "engines": {
         "node": ">=8",
         "npm": ">=5"
@@ -10,6 +12,7 @@
         "lint": "tslint -c tslint.json 'src/**/*.ts'",
         "pretest": "npm run lint",
         "test": "nyc mocha -r ts-node/register src/**/*.spec.ts",
+        "start": "fabric-chaincode-node start",
         "build": "tsc",
         "build:watch": "tsc -w",
         "prepublishOnly": "npm run build"
@@ -18,8 +21,8 @@
     "author": "Hyperledger",
     "license": "Apache-2.0",
     "dependencies": {
-        "fabric-ca-client": "^2.1.0",
-        "fabric-network": "^2.1.0"
+        "fabric-contract-api": "^2.0.0",
+        "fabric-shim": "^2.0.0"
     },
     "devDependencies": {
         "@types/chai": "^4.1.7",

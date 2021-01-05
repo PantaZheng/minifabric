@@ -9,7 +9,7 @@
 
 - name: Create channel sign off script
   template:
-    src: "{{ pjroot }}/playbooks/ops/templates/channelsignoff.j2"
+    src: "{{ pjroot }}/playbooks/ops/templates/channelsignoff.sh.j2"
     dest: "{{ pjroot }}/vars/run/channelsignoff.sh"
     mode: +x
 

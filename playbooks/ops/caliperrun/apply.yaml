@@ -17,7 +17,7 @@
 - name: Generate bench mark configuration file only if there is none
   when: bcfg.stat.exists == false
   template:
-    src: "{{ pjroot }}/playbooks/ops/caliperrun/templates/benchmarkconfig.j2"
+    src: "{{ pjroot }}/playbooks/ops/caliperrun/templates/benchmarkconfig.yaml.j2"
     dest: "{{ pjroot }}/vars/run/caliperbenchmarkconfig.yaml"
 
 - name: Create caliper run script

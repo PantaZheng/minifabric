@@ -14,7 +14,7 @@
 
   - name: Create chaincode commit script
     template:
-      src: "{{ pjroot }}/playbooks/ops/templates/cccommit2.j2"
+      src: "{{ pjroot }}/playbooks/ops/templates/cccommit2.sh.j2"
       dest: "{{ pjroot }}/vars/run/cccommit.sh"
       mode: +x
 

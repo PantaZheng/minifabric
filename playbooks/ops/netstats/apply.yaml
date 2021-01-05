@@ -44,7 +44,7 @@
 
 - name: Create node health query script
   template:
-    src: "{{ pjroot }}/playbooks/ops/templates/stats.j2"
+    src: "{{ pjroot }}/playbooks/ops/templates/stats.sh.j2"
     dest: "{{ pjroot }}/vars/run/stats.sh"
     mode: +x
 

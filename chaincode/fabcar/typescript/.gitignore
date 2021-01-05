@@ -79,5 +79,3 @@ typings/
 # Compiled TypeScript files
 dist
 
-wallet
-!wallet/.gitkeep

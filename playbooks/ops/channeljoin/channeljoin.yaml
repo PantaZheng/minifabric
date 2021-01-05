@@ -8,7 +8,7 @@
 
 - name: Create chanel join script
   template:
-    src: "{{ pjroot }}/playbooks/ops/templates/channeljoin.j2"
+    src: "{{ pjroot }}/playbooks/ops/templates/channeljoin.sh.j2"
     dest: "{{ pjroot }}/vars/run/channeljoin.{{ actingpeer.fullname }}.sh"
     mode: +x
 

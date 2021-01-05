@@ -9,7 +9,7 @@
 
 - name: Create chaincode query script
   template:
-    src: "{{ pjroot }}/playbooks/ops/templates/ccquery.j2"
+    src: "{{ pjroot }}/playbooks/ops/templates/ccquery.sh.j2"
     dest: "{{ pjroot }}/vars/run/ccquery.sh"
     mode: +x
 

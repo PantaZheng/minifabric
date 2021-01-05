@@ -8,7 +8,7 @@
 
 - name: Create channel creation script
   template:
-    src: "{{ pjroot }}/playbooks/ops/templates/channelcreate.j2"
+    src: "{{ pjroot }}/playbooks/ops/templates/channelcreate.sh.j2"
     dest: "{{ pjroot }}/vars/run/channelcreate.sh"
     mode: +x
 

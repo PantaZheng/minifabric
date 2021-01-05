@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC2034
 declare XX_CHANNEL_NAME='mychannel'
 declare XX_CC_LANGUAGE='go'
 declare XX_IMAGETAG='2.3.0'

@@ -8,7 +8,7 @@
 
 - name: Create channel update script
   template:
-    src: "{{ pjroot }}/playbooks/ops/templates/channelupdate.j2"
+    src: "{{ pjroot }}/playbooks/ops/templates/channelupdate.sh.j2"
     dest: "{{ pjroot }}/vars/run/channelupdate.sh"
     mode: +x
 

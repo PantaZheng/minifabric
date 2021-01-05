@@ -18,7 +18,7 @@
 
 - name: Create channel discover script
   template:
-    src: "{{ pjroot }}/playbooks/ops/templates/discover.j2"
+    src: "{{ pjroot }}/playbooks/ops/templates/discover.sh.j2"
     dest: "{{ pjroot }}/vars/run/discover.sh"
     mode: +x
 

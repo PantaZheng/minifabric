@@ -8,7 +8,7 @@
 
 - name: Create channel query script
   template:
-    src: "{{ pjroot }}/playbooks/ops/templates/channelquery.j2"
+    src: "{{ pjroot }}/playbooks/ops/templates/channelquery.sh.j2"
     dest: "{{ pjroot }}/vars/run/channelquery.sh"
     mode: +x
 
