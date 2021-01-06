@@ -58,7 +58,7 @@ COLORS = {
 
 def dict_diff(prv, nxt):
     """Return a dict of keys that differ with another config object."""
-    keys = set(prv.keys()).union(nxt.keys())
+    keys = set(prv.keys() + nxt.keys())
     result = {}
     for k in keys:
         if prv.get(k) != nxt.get(k):
