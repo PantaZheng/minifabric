@@ -9,7 +9,7 @@
 
 - name: Create chaincode instantiate script
   template:
-    src: "{{ pjroot }}/playbooks/ops/templates/ccinstantiate{{ isuffix }}.j2"
+    src: "{{ pjroot }}/playbooks/ops/templates/ccinstantiate{{ isuffix }}.sh.j2"
     dest: "{{ pjroot }}/vars/run/ccinstantiate.sh"
     mode: +x
 

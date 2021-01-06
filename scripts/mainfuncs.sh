@@ -96,6 +96,7 @@ function doDefaults() {
   for value in ${params[@]}; do
     if [ -z ${!value+x} ]; then
       # shellcheck disable=SC2140
+      # shellcheck disable=SC1135
       tt="$value=$"XX_"$value"
       eval "$tt"
     fi

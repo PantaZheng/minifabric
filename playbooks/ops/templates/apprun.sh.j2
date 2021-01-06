@@ -1,0 +1,25 @@
+#!/bin/bash
+# scripts to start the application against the network
+{% include "envsetting.sh.j2" %}
+cd {{ APP_DIR }}
+
+{% if APP_LANGUAGE == 'go' %}
+{% if fabric.goproxy is defined and APP_LANGUAGE == 'go' %}
+go env -w GOPROXY={{ fabric.goproxy }}
+{% endif %}
+if [ -f 'go.mod' ] && [ ! -d 'vendor' ]; then
+  export GO111MODULE=on
+  go mod vendor
+fi
+export GO111MODULE=off
+ls
+go run main.go
+{% endif %}
+
+{% if APP_LANGUAGE == 'node' %}
+cd {{ APP_DIR }}
+if [ -f 'package.json' ] && [ ! -d 'node_modules' ]; then
+  yarn install
+fi
+node main.js
+{% endif %}

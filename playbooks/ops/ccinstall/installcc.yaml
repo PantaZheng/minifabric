@@ -9,7 +9,7 @@
 
 - name: Create chaincode install script
   template:
-    src: "{{ pjroot }}/playbooks/ops/templates/ccinstall{{isuffix}}.j2"
+    src: "{{ pjroot }}/playbooks/ops/templates/ccinstall{{isuffix}}.sh.j2"
     dest: "{{ pjroot }}/vars/run/ccinstall.{{ actingpeer.fullname }}.sh"
     mode: +x
 

@@ -9,29 +9,33 @@
 
 - name: Create apprun script
   template:
-    src: "{{ pjroot }}/playbooks/ops/apprun/templates/apprun_{{
-          APP_LANGUAGE }}.j2"
+    src: "{{ pjroot }}/playbooks/ops/templates/apprun.sh.j2"
     dest: "{{ pjroot }}/vars/run/apprun.sh"
     mode: +x
 
 - name: Change var file permission
   command: >-
-    chown -R 1000:1000 {{ pjroot }}/app
+    chown -R 1000:1000 {{ pjroot }}/vars/app/
+
+- name: Make sure that wallet directory exists
+  file:
+    path: "{{ pjroot }}/vars/app/{{ CC_NAME }}/{{ APP_LANGUAGE }}/wallets"
+    state: "directory"
 
 - name: Copy APP files
   command: "{{ item }}"
   with_items:
-    - 'cp -r {{ pjroot }}/app/{{ APP_LANGUAGE }} {{ pjroot }}/vars/app'
     - 'cp {{ pjroot }}/vars/profiles/{{ CHANNEL_NAME }}_connection.yaml
-      {{ pjroot }}/vars/app/{{ APP_LANGUAGE }}/connection.yaml'
-    - 'cp {{ pjroot }}/vars/profiles/vscode/wallets/{{ CURRENT_ORG}}/Admin.id
-      {{ pjroot }}/vars/app/{{ APP_LANGUAGE }}/wallets/Admin.id'
+      {{ pjroot }}/vars/app/{{ CC_NAME }}/{{ APP_LANGUAGE }}/connection.yaml'
+    - 'cp {{ pjroot }}/vars/profiles/vscode/wallets/{{ CURRENT_ORG }}/Admin.id
+      {{ pjroot }}/vars/app/{{ CC_NAME }}/{{ APP_LANGUAGE }}/wallets/Admin.id'
+
 
 - name: Run the chaincode application
   command: >-
     docker run --network {{ NETNAME }} --name apprun --hostname apprun
     -v /var/run/docker.sock:/var/run/docker.sock
-    -v {{ hostroot }}/vars/app/{{ APP_LANGUAGE }}:{{ APP_DIR }}
+    -v {{ hostroot }}/vars/app/{{ CC_NAME }}/{{ APP_LANGUAGE }}:{{ APP_DIR }}
     -v {{ hostroot }}/vars/run/apprun.sh:/vars/run/apprun.sh
     -e TZ="Asia/Shanghai"
     --entrypoint /vars/run/apprun.sh
@@ -42,10 +46,10 @@
   when: runstates.rc != 0
   debug:
     msg: "{{ runstates.stderr_lines }}"
-  tags: [print_action]
+  tags: [ print_action ]
 
 - name: App run
   when: runstates.rc == 0
   debug:
     msg: "Application in {{ APP_LANGUAGE }} completed successfully"
-  tags: [print_action]
+  tags: [ print_action ]
