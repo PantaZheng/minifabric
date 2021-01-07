@@ -24,9 +24,9 @@ logger.level = "all"
 async function main() {
     try {
         // load the network configuration
-        const ccp = YAML.parse(fs.readFileSync('./connection.yaml', 'utf8'))
+        const ccp = YAML.parse(fs.readFileSync('./profiles/connection.yaml', 'utf8'))
         // Create a new file system based wallet for managing identities.
-        const wallet = await Wallets.newFileSystemWallet('./wallets');
+        const wallet = await Wallets.newFileSystemWallet('./profiles/wallets');
         // Check to see if we've already enrolled the admin user.
         const identity = await wallet.get('Admin');
         if (!identity) {

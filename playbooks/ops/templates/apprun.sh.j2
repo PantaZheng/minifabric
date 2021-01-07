@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/bin/sh
 # scripts to start the application against the network
-{% include "envsetting.sh.j2" %}
+
 cd {{ APP_DIR }}
 
 {% if APP_LANGUAGE == 'go' %}
@@ -17,7 +17,6 @@ go run main.go
 {% endif %}
 
 {% if APP_LANGUAGE == 'node' %}
-cd {{ APP_DIR }}
 if [ -f 'package.json' ] && [ ! -d 'node_modules' ]; then
   yarn install
 fi

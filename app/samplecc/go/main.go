@@ -94,8 +94,8 @@ func doEnroll() {
 }
 
 func useClientExecute(index int) {
-// 	cnfg := config.FromFile("./connection.json")
-    cnfg := config.FromFile("./connection.yaml")
+	// 	cnfg := config.FromFile("./connection.json")
+	cnfg := config.FromFile("./connection.yaml")
 	fmt.Println(reflect.TypeOf(cnfg))
 	sdk, err := fabsdk.New(cnfg)
 	if err != nil {
@@ -175,7 +175,14 @@ then this example code will use the wallet file and connection file to make
 connections to Fabric network
 */
 func useWalletGateway() {
-	wallet, err := gateway.NewFileSystemWallet("./wallets")
+	file, err := os.OpenFile("golang.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err == nil {
+		logger.SetOutput(file)
+	} else {
+		logger.Info("Failed to log to file, using default stderr")
+	}
+
+	wallet, err := gateway.NewFileSystemWallet("./profiles/wallets")
 	if err != nil {
 		fmt.Printf("Failed to create wallet: %s\n", err)
 		os.Exit(1)
@@ -186,16 +193,9 @@ func useWalletGateway() {
 		os.Exit(1)
 	}
 
-	file, err := os.OpenFile("golang.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err == nil {
-	 logger.SetOutput(file)
-	} else {
-	 logger.Info("Failed to log to file, using default stderr")
-	}
-
 	gw, err := gateway.Connect(
 		//gateway.WithConfig(config.FromFile("./connection.json")),
-		gateway.WithConfig(config.FromFile("./connection.yaml")),
+		gateway.WithConfig(config.FromFile("./profiles/connection.yaml")),
 		gateway.WithIdentity(wallet, "Admin"),
 	)
 	if err != nil {

@@ -9,7 +9,7 @@ OPNAMES:
   channeljoin: "channel join"
   blockquery: "block query"
   channelquery: "channel query"
-  profilegen: "profile generation"
+  profilegen: "profiles generation"
   channelsign: "channel signoff"
   channelupdate: "channel update"
   anchorupdate: "anchor update"

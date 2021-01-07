@@ -1,11 +1,11 @@
 ---
 - name: Set up app sdk release
   set_fact:
-    APP_LANGUAGE: "go"
+    APP_LANGUAGE: "node"
 
 - name: Set up app dir
   set_fact:
-    APP_DIR: "/go/src/github.com/app/{{ APP_LANGUAGE }}"
+    APP_DIR: "/go/src/github.com/app"
 
 - name: Create apprun script
   template:
@@ -15,20 +15,15 @@
 
 - name: Change var file permission
   command: >-
-    chown -R 1000:1000 {{ pjroot }}/vars/app/
-
-- name: Make sure that wallet directory exists
-  file:
-    path: "{{ pjroot }}/vars/app/{{ CC_NAME }}/{{ APP_LANGUAGE }}/wallets"
-    state: "directory"
+    chown -R 1000:1000 {{ pjroot }}/vars/app/{{ CC_NAME }}
 
 - name: Copy APP files
   command: "{{ item }}"
   with_items:
     - 'cp {{ pjroot }}/vars/profiles/{{ CHANNEL_NAME }}_connection.yaml
-      {{ pjroot }}/vars/app/{{ CC_NAME }}/{{ APP_LANGUAGE }}/connection.yaml'
+      {{ pjroot }}/vars/app/{{ CC_NAME }}/{{ APP_LANGUAGE }}/profiles/connection.yaml'
     - 'cp {{ pjroot }}/vars/profiles/vscode/wallets/{{ CURRENT_ORG }}/Admin.id
-      {{ pjroot }}/vars/app/{{ CC_NAME }}/{{ APP_LANGUAGE }}/wallets/Admin.id'
+      {{ pjroot }}/vars/app/{{ CC_NAME }}/{{ APP_LANGUAGE }}/profiles/wallets/Admin.id'
 
 
 - name: Run the chaincode application
@@ -45,7 +40,7 @@
 - name: App run
   when: runstates.rc != 0
   debug:
-    msg: "{{ runstates.stderr_lines }}"
+    msg: "{{  runstates.stderr_lines }}"
   tags: [ print_action ]
 
 - name: App run

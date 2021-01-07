@@ -12,7 +12,7 @@
     src: "{{ pjroot }}/playbooks/ops/explorerup/templates/explorerconfig.j2"
     dest: "{{ pjroot }}/vars/explorer/{{ CHANNEL_NAME}}_config.json"
 
-- name: Create connection profile for the explorer
+- name: Create connection profiles for the explorer
   template:
     src: "{{ pjroot }}/playbooks/ops/explorerup/templates/explorerprofile.j2"
     dest: "{{ pjroot }}/vars/explorer/{{ CHANNEL_NAME}}_profile.json"
