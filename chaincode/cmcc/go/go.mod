@@ -11,6 +11,8 @@ require (
 	github.com/hashicorp/go-version v1.2.1 // indirect
 	github.com/hyperledger/fabric v1.4.1
 	github.com/hyperledger/fabric-amcl v0.0.0-20200424173818-327c9e2cf77a // indirect
+	github.com/hyperledger/fabric-chaincode-go v0.0.0-20201119163726-f8ef75b17719
+	github.com/hyperledger/fabric-contract-api-go v1.1.1
 	github.com/miekg/pkcs11 v1.0.3 // indirect
 	github.com/op/go-logging v0.0.0-20160315200505-970db520ece7 // indirect
 	github.com/spf13/viper v1.7.1 // indirect

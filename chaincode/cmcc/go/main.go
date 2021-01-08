@@ -10,17 +10,19 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/golang/protobuf/proto"
-	"github.com/hyperledger/fabric/core/chaincode/shim"
-	"github.com/hyperledger/fabric/protos/common"
-	"github.com/hyperledger/fabric/protos/msp"
-	pb "github.com/hyperledger/fabric/protos/peer"
 	"math/rand"
 	"time"
+
+	"github.com/hyperledger/fabric-contract-api-go/contractapi"
+
+	"github.com/golang/protobuf/proto"
+	"github.com/hyperledger/fabric/protos/common"
+	"github.com/hyperledger/fabric/protos/msp"
 )
 
 // ManagementChaincode serves functionalities to communicate channel updates and signatures between different channel members.
 type ManagementChaincode struct {
+	contractapi.Contract
 }
 
 // Proposal gathers all information of a proposed update, including all added signatures.
@@ -44,43 +46,62 @@ const (
 	NewSignatureEvent   = "newSignatureEvent"
 )
 
+// ErrProposalNotFound is returned when the requested object is not found.
+var ErrProposalNotFound = fmt.Errorf("proposal not found")
+
+func getMSPID(creator []byte) (mspID string, err error) {
+	identity := &msp.SerializedIdentity{}
+	if err = proto.Unmarshal(creator, identity); err != nil {
+		return "", fmt.Errorf("error happened unmarshalling the creator: %v", err)
+	}
+	return identity.Mspid, err
+}
+
+// getProposal fetches and decodes the proposal with the given id from the state or returns an error.
+func getProposal(ctx contractapi.TransactionContextInterface, id string) (proposal *Proposal, err error) {
+	proposalJSON, err := ctx.GetStub().GetState(id)
+	if err != nil {
+		return nil, fmt.Errorf("error happened reading proposal with id (%s): %v", id, err)
+	}
+	if len(proposalJSON) == 0 {
+		return nil, ErrProposalNotFound
+	}
+	err = json.Unmarshal(proposalJSON, proposal)
+	if err != nil {
+		return nil, fmt.Errorf("error happened unmarshalling the proposal JSON representation to struct: %v", err)
+	}
+	return proposal, err
+}
+
 // Init is called during Instantiate transaction after the chaincode container
 // has been established for the first time, allowing the chaincode to
 // initialize its internal data
-func (mcc *ManagementChaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
-	return shim.Success(nil)
-}
-
-func main() {
-	rand.Seed(time.Now().UTC().UnixNano())
-	err := shim.Start(new(ManagementChaincode))
-	if err != nil {
-		fmt.Printf("Error starting management chaincode: %s", err)
-	}
+func (mcc *ManagementChaincode) Init(contractapi.TransactionContextInterface) (err error) {
+	return err
 }
 
 // Invoke is called to update or query the ledger in a proposal transaction.
 // Updated state variables are not committed to the ledger until the
 // transaction is committed.
-func (mcc *ManagementChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
-	function, args := stub.GetFunctionAndParameters()
-	switch function {
-	case "proposeUpdate":
-		return mcc.proposeUpdate(stub, args)
-	case "addSignature":
-		return mcc.addSignature(stub, args)
-	case "getProposals":
-		return mcc.getProposals(stub, args)
-	case "getProposal":
-		return mcc.getProposal(stub, args)
-	case "deleteProposal":
-		return mcc.deleteProposal(stub, args)
-	default:
-		return shim.Error("Invalid invoke function name. Expecting \"proposeUpdate\" \"addSignature\" \"getProposals\" \"getProposal\" \"deleteProposal\".")
-	}
-}
+//func (mcc *ManagementChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
+//	function, args := stub.GetFunctionAndParameters()
+//	switch function {
+//	case "proposeUpdate":
+//		return mcc.proposeUpdate(stub, args)
+//	case "addSignature":
+//		return mcc.addSignature(stub, args)
+//	case "getProposals":
+//		return mcc.getProposals(stub, args)
+//	case "getProposal":
+//		return mcc.getProposal(stub, args)
+//	case "deleteProposal":
+//		return mcc.deleteProposal(stub, args)
+//	default:
+//		return shim.Error("Invalid invoke function name. Expecting \"proposeUpdate\" \"addSignature\" \"getProposals\" \"getProposal\" \"deleteProposal\".")
+//	}
+//}
 
-// proposeUpdate creates a new proposal containing the given update and a description.
+// ProposeUpdate creates a new proposal containing the given update and a description.
 //
 // Arguments:
 //   0: proposalID  - the ID of the new proposal
@@ -94,53 +115,50 @@ func (mcc *ManagementChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Resp
 //   name: newProposalEvent(<proposalID>)
 //   payload: ID of the proposal
 //
-func (mcc *ManagementChaincode) proposeUpdate(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	if len(args) != 3 {
-		return shim.Error("incorrect number of arguments - expecting 3: proposalID, configUpdate, description")
-	}
-
-	proposalID := args[0]
-	configUpdate := args[1]
-	description := args[2]
+func (mcc *ManagementChaincode) ProposeUpdate(ctx contractapi.TransactionContextInterface, proposalID, configUpdate, description string) (msg interface{}, err error) {
 
 	// check if the configUpdate is in the correct format: base64 encoded proto/common.ConfigUpdate
 	update, err := base64.StdEncoding.DecodeString(configUpdate)
 	if err != nil {
-		return shim.Error(fmt.Sprintf("error happened decoding the configUpdate base64 string: %v", err))
+		return nil, fmt.Errorf("error happened decoding the configUpdate base64 string: %v", err)
 	}
-	if err := proto.Unmarshal(update, &common.ConfigUpdate{}); err != nil {
-		return shim.Error(fmt.Sprintf("error happened decoding common.ConfigUpdate: %v", err))
+	err = proto.Unmarshal(update, &common.ConfigUpdate{})
+	if err != nil {
+		return nil, fmt.Errorf("error happened decoding common.ConfigUpdate: %v", err)
 	}
 
-	if _, err := getProposal(stub, proposalID); err != ErrProposalNotFound {
-		return shim.Error("ProposalID already in use.")
+	_, err = getProposal(ctx, proposalID)
+	if err != ErrProposalNotFound {
+		return nil, fmt.Errorf("proposalID already in use")
 	}
 
 	// create and store the proposal
-	creator, err := stub.GetCreator()
+	creator, err := ctx.GetStub().GetCreator()
 	if err != nil {
-		return shim.Error("error happened reading the transaction creator: " + err.Error())
+		return nil, fmt.Errorf("error happened reading the transaction creator: " + err.Error())
 	}
 	mspID, err := getMSPID(creator)
 	if err != nil {
-		return shim.Error(err.Error())
+		return nil, err
 	}
 	proposal := Proposal{
 		ConfigUpdate: configUpdate,
 		Description:  description,
 		Creator:      mspID,
 	}
-	propsosalJSON, err := json.Marshal(proposal)
+	proposalJSON, err := json.Marshal(proposal)
 	if err != nil {
-		return shim.Error("error happened marshalling the new proposal: " + err.Error())
+		return nil, fmt.Errorf("error happened marshalling the new proposal: " + err.Error())
 	}
-	if err := stub.PutState(string(proposalID), propsosalJSON); err != nil {
-		return shim.Error("error happened persisting the new proposal on the ledger: " + err.Error())
+	err = ctx.GetStub().PutState(proposalID, proposalJSON)
+	if err != nil {
+		return nil, fmt.Errorf("error happened persisting the new proposal on the ledger: " + err.Error())
 	}
-	if err = stub.SetEvent(fmt.Sprintf("%s(%s)", NewProposalEvent, proposalID), []byte(proposalID)); err != nil {
-		return shim.Error("error happened emitting event: " + err.Error())
+	err = ctx.GetStub().SetEvent(fmt.Sprintf("%s(%s)", NewProposalEvent, proposalID), []byte(proposalID))
+	if err != nil {
+		return nil, fmt.Errorf("error happened emitting event: " + err.Error())
 	}
-	return shim.Success([]byte(fmt.Sprintf("{\"proposal_id\":\"%v\"}", proposalID)))
+	return json.Marshal(map[string]interface{}{"proposal_id": proposalID})
 }
 
 // addSignature adds (or updates) a signature of the calling organization to the proposal.
@@ -153,35 +171,30 @@ func (mcc *ManagementChaincode) proposeUpdate(stub shim.ChaincodeStubInterface, 
 //   name: newSignatureEvent(<proposalID>)
 //   payload: ID of the proposal
 //
-func (mcc *ManagementChaincode) addSignature(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	if len(args) != 2 {
-		return shim.Error("incorrect number of arguments - expecting 2: proposalID, signature")
-	}
-	proposalID := args[0]
-	signature := args[1]
-
+func (mcc *ManagementChaincode) addSignature(ctx contractapi.TransactionContextInterface, proposalID, signature string) (err error) {
 	// check if the signature is in the correct format: base64 encoded proto/common.ConfigSignature
 	sig, err := base64.StdEncoding.DecodeString(signature)
 	if err != nil {
-		return shim.Error(fmt.Sprintf("error happened decoding the signature base64 string: %v", err))
+		return fmt.Errorf("error happened decoding the signature base64 string: %v", err.Error())
 	}
-	if err := proto.Unmarshal(sig, &common.ConfigSignature{}); err != nil {
-		return shim.Error(fmt.Sprintf("error happened decoding common.ConfigSignature: %v", err))
+	err = proto.Unmarshal(sig, &common.ConfigSignature{})
+	if err != nil {
+		return fmt.Errorf("error happened decoding common.ConfigSignature: %v", err.Error())
 	}
 
-	creator, err := stub.GetCreator()
+	creator, err := ctx.GetStub().GetCreator()
 	if err != nil {
-		return shim.Error("error happened reading the transaction creator: " + err.Error())
+		return fmt.Errorf("error happened reading the transaction creator: %v", err.Error())
 	}
 	mspID, err := getMSPID(creator)
 	if err != nil {
-		return shim.Error(err.Error())
+		return err
 	}
 
 	// fetch and update the state of the proposal
-	proposal, err := getProposal(stub, proposalID)
+	proposal, err := getProposal(ctx, proposalID)
 	if err != nil {
-		return shim.Error(err.Error())
+		return err
 	}
 	if proposal.Signatures == nil {
 		proposal.Signatures = make(map[string]string)
@@ -191,15 +204,17 @@ func (mcc *ManagementChaincode) addSignature(stub shim.ChaincodeStubInterface, a
 	// store the updated proposal
 	proposalJSONUpdated, err := json.Marshal(proposal)
 	if err != nil {
-		return shim.Error("error happened marshalling the updated proposal: " + err.Error())
+		return fmt.Errorf("error happened marshalling the updated proposal: %v", err.Error())
 	}
-	if err := stub.PutState(proposalID, proposalJSONUpdated); err != nil {
-		return shim.Error("error happened persisting the updated proposal on the ledger: " + err.Error())
+	err = ctx.GetStub().PutState(proposalID, proposalJSONUpdated)
+	if err != nil {
+		return fmt.Errorf("error happened persisting the updated proposal on the ledger: %v", err.Error())
 	}
-	if err = stub.SetEvent(fmt.Sprintf("%s(%s)", NewSignatureEvent, proposalID), []byte(proposalID)); err != nil {
-		return shim.Error("error happened emitting event: " + err.Error())
+	err = ctx.GetStub().SetEvent(fmt.Sprintf("%s(%s)", NewSignatureEvent, proposalID), []byte(proposalID))
+	if err != nil {
+		return fmt.Errorf("error happened emitting event: %v", err.Error())
 	}
-	return shim.Success(nil)
+	return err
 }
 
 // deleteProposal deletes the proposal with the given ID from the state.
@@ -212,40 +227,38 @@ func (mcc *ManagementChaincode) addSignature(stub shim.ChaincodeStubInterface, a
 //   name: deleteProposalEvent(<proposalID>)
 //   payload: ID of the proposal
 //
-func (mcc *ManagementChaincode) deleteProposal(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	if len(args) != 1 {
-		return shim.Error("incorrect number of arguments - expecting 1: proposalID")
-	}
-	proposalID := args[0]
+func (mcc *ManagementChaincode) deleteProposal(ctx contractapi.TransactionContextInterface, proposalID string) (err error) {
 
 	// fetch proposal
-	proposal, err := getProposal(stub, proposalID)
+	proposal, err := getProposal(ctx, proposalID)
 	if err != nil {
-		return shim.Error(err.Error())
+		return fmt.Errorf("error happened fetch proposal: " + err.Error())
 	}
 
-	creator, err := stub.GetCreator()
+	creator, err := ctx.GetStub().GetCreator()
 	if err != nil {
-		return shim.Error("error happened reading the transaction creator: " + err.Error())
+		return fmt.Errorf("error happened reading the transaction creator: " + err.Error())
 	}
 	mspID, err := getMSPID(creator)
 	if err != nil {
-		return shim.Error(err.Error())
+		return fmt.Errorf("error happened get mspID: " + err.Error())
 	}
 
 	// check if calling organization is proposal creator
 	if proposal.Creator != mspID {
-		return shim.Error(fmt.Sprintf("forbidden. only the proposal creator (%s) can delete the proposal", proposal.Creator))
+		return fmt.Errorf("forbidden. only the proposal creator (%s) can delete the proposal", proposal.Creator)
 	}
 
 	// delete the proposal
-	if err := stub.DelState(proposalID); err != nil {
-		return shim.Error(fmt.Sprintf("error happened deleting the state: %v", err))
+	err = ctx.GetStub().DelState(proposalID)
+	if err != nil {
+		return fmt.Errorf("error happened deleting the state: %v", err)
 	}
-	if err = stub.SetEvent(fmt.Sprintf("%s(%s)", DeleteProposalEvent, proposalID), []byte(proposalID)); err != nil {
-		return shim.Error("error happened emitting event: " + err.Error())
+	err = ctx.GetStub().SetEvent(fmt.Sprintf("%s(%s)", DeleteProposalEvent, proposalID), []byte(proposalID))
+	if err != nil {
+		return fmt.Errorf("error happened emitting event: " + err.Error())
 	}
-	return shim.Success(nil)
+	return err
 }
 
 // getProposals returns all proposals.
@@ -255,34 +268,34 @@ func (mcc *ManagementChaincode) deleteProposal(stub shim.ChaincodeStubInterface,
 // Returns:
 //   a map from proposalID to proposal
 //
-func (mcc *ManagementChaincode) getProposals(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	if len(args) != 0 {
-		return shim.Error("incorrect number of arguments - expecting 0")
-	}
+func (mcc *ManagementChaincode) getProposals(ctx contractapi.TransactionContextInterface) (proposalsJSON []byte, err error) {
 	proposals := make(map[string]*Proposal)
-	proposalIterator, err := stub.GetStateByRange("", "")
+	proposalIterator, err := ctx.GetStub().GetStateByRange("", "")
 	if err != nil {
-		return shim.Error("error happened reading keys from ledger: " + err.Error())
+		return nil, fmt.Errorf("error happened reading keys from ledger: " + err.Error())
 	}
-	defer proposalIterator.Close()
+	defer func() {
+		_ = proposalIterator.Close()
+	}()
 
 	for proposalIterator.HasNext() {
 		proposalJSON, err := proposalIterator.Next()
 		if err != nil {
-			return shim.Error("error happened iterating over available proposals: " + err.Error())
+			return nil, fmt.Errorf("error happened iterating over available proposals: " + err.Error())
 		}
 		proposal := &Proposal{}
-		if err = json.Unmarshal(proposalJSON.Value, proposal); err != nil {
-			return shim.Error("error happened unmarshalling a proposal JSON representation to struct: " + err.Error())
+		err = json.Unmarshal(proposalJSON.Value, proposal)
+		if err != nil {
+			return nil, fmt.Errorf("error happened unmarshalling a proposal JSON representation to struct: " + err.Error())
 		}
 		proposals[proposalJSON.Key] = proposal
 	}
 
-	proposalsJSON, err := json.Marshal(proposals)
+	proposalsJSON, err = json.Marshal(proposals)
 	if err != nil {
-		return shim.Error("error happened marshalling the update proposals: " + err.Error())
+		return proposalsJSON, fmt.Errorf("error happened marshalling the update proposals: " + err.Error())
 	}
-	return shim.Success(proposalsJSON)
+	return proposalsJSON, err
 }
 
 // getProposal returns the proposal with the given ID.
@@ -293,44 +306,26 @@ func (mcc *ManagementChaincode) getProposals(stub shim.ChaincodeStubInterface, a
 // Returns:
 //   the proposal with the given ID
 //
-func (mcc *ManagementChaincode) getProposal(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	if len(args) != 1 {
-		return shim.Error("incorrect number of arguments - expecting 1: proposalID")
-	}
-	proposalID := args[0]
-	proposalJSON, err := stub.GetState(proposalID)
+func (mcc *ManagementChaincode) getProposal(ctx contractapi.TransactionContextInterface, proposalID string) (proposalJSON []byte, err error) {
+	proposalJSON, err = ctx.GetStub().GetState(proposalID)
 	if err != nil {
-		return shim.Error(fmt.Sprintf("error happened reading proposal with id (%v): %v", proposalID, err))
+		return proposalJSON, fmt.Errorf("error happened reading proposal with id (%v): %v", proposalID, err)
 	}
 	if len(proposalJSON) == 0 {
-		return shim.Error(fmt.Sprintf("proposal with id (%s) not found", proposalID))
+		return proposalJSON, fmt.Errorf(fmt.Sprintf("proposal with id (%s) not found", proposalID))
 	}
-	return shim.Success(proposalJSON)
+	return proposalJSON, err
 }
 
-func getMSPID(creator []byte) (string, error) {
-	identity := &msp.SerializedIdentity{}
-	if err := proto.Unmarshal(creator, identity); err != nil {
-		return "", fmt.Errorf("error happened unmarshalling the creator: %v", err)
-	}
-	return identity.Mspid, nil
-}
-
-// ErrProposalNotFound is returned when the requested object is not found.
-var ErrProposalNotFound = fmt.Errorf("Proposal not found.")
-
-// getProposal fetches and decodes the proposal with the given id from the state or returns an error.
-func getProposal(stub shim.ChaincodeStubInterface, id string) (*Proposal, error) {
-	proposalJSON, err := stub.GetState(id)
+func main() {
+	var err error
+	rand.Seed(time.Now().UTC().UnixNano())
+	cc, err := contractapi.NewChaincode(new(ManagementChaincode))
 	if err != nil {
-		return nil, fmt.Errorf("error happened reading proposal with id (%s): %v", id, err)
+		panic(err.Error())
 	}
-	if len(proposalJSON) == 0 {
-		return nil, ErrProposalNotFound
+	err = cc.Start()
+	if err != nil {
+		fmt.Printf("Error starting management chaincode: %s", err)
 	}
-	proposal := &Proposal{}
-	if err := json.Unmarshal(proposalJSON, proposal); err != nil {
-		return nil, fmt.Errorf("error happened unmarshalling the proposal JSON representation to struct: %v", err)
-	}
-	return proposal, nil
 }

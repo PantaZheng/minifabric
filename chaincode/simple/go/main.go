@@ -130,11 +130,13 @@ func (t *Simple) Query(ctx contractapi.TransactionContextInterface, A string) (r
 }
 
 func main() {
+	var err error
 	cc, err := contractapi.NewChaincode(new(Simple))
 	if err != nil {
 		panic(err.Error())
 	}
-	if err := cc.Start(); err != nil {
+	err = cc.Start()
+	if err != nil {
 		fmt.Printf("Error starting ABstore chaincode: %s", err)
 	}
 }
