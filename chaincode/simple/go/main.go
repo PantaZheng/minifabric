@@ -35,7 +35,7 @@ type Simple struct {
 	contractapi.Contract
 }
 
-func (t *Simple) Init(ctx contractapi.TransactionContextInterface, A, B string, AVal, BVal int) (err error) {
+func (t *Simple) Init(ctx contractapi.TransactionContextInterface, A string, AVal int, B string, BVal int) (err error) {
 	fmt.Println("Simple Init")
 
 	fmt.Printf("AVal = %d, BVal = %d\n", AVal, BVal)
