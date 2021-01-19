@@ -20,6 +20,8 @@ import (
 	"github.com/hyperledger/fabric/protos/msp"
 )
 
+//TODO： 依赖不应那么多，需要根据最新的实现来修改代码写法
+
 // ManagementChaincode serves functionalities to communicate channel updates and signatures between different channel members.
 type ManagementChaincode struct {
 	contractapi.Contract

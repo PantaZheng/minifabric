@@ -35,9 +35,9 @@ type Simple struct {
 	contractapi.Contract
 }
 
-func (t *Simple) Init(ctx contractapi.TransactionContextInterface, A string, AVal int, B string, BVal int) (err error) {
+func (t *Simple) Init(ctx contractapi.TransactionContextInterface, A string, AVal int, B string, BVal int) error {
+	var err error
 	fmt.Println("Simple Init")
-
 	fmt.Printf("AVal = %d, BVal = %d\n", AVal, BVal)
 
 	// Write the state to the ledger
@@ -51,11 +51,11 @@ func (t *Simple) Init(ctx contractapi.TransactionContextInterface, A string, AVa
 		return err
 	}
 
-	return err
+	return nil
 }
 
 // Invoke Transaction makes payment of X units from A to B
-func (t *Simple) Invoke(ctx contractapi.TransactionContextInterface, A, B string, X int) (err error) {
+func (t *Simple) Invoke(ctx contractapi.TransactionContextInterface, A, B string, X int) error {
 	fmt.Println("Simple Invoke")
 	var AVal, BVal int // Asset holdings
 
@@ -94,39 +94,38 @@ func (t *Simple) Invoke(ctx contractapi.TransactionContextInterface, A, B string
 		return err
 	}
 
-	return err
+	return nil
 }
 
 // Delete an entity from state
-func (t *Simple) Delete(ctx contractapi.TransactionContextInterface, A string) (err error) {
+func (t *Simple) Delete(ctx contractapi.TransactionContextInterface, A string) error {
 	fmt.Println("Simple Delete")
 	// Delete the key from the state in ledger
-	err = ctx.GetStub().DelState(A)
+	err := ctx.GetStub().DelState(A)
 	if err != nil {
 		return fmt.Errorf("failed to delete state")
 	}
-	return err
+	return nil
 }
 
 // Query callback representing the query of a chaincode
-func (t *Simple) Query(ctx contractapi.TransactionContextInterface, A string) (result string, err error) {
+func (t *Simple) Query(ctx contractapi.TransactionContextInterface, A string) (string, error) {
 	fmt.Println("Simple Query")
 	// Get the state from the ledger
 	AValBytes, err := ctx.GetStub().GetState(A)
 	if err != nil {
 		jsonResp := "{\"Error\":\"Failed to get state for " + A + "\"}"
-		return result, errors.New(jsonResp)
+		return "", errors.New(jsonResp)
 	}
 
 	if AValBytes == nil {
 		jsonResp := "{\"Error\":\"Nil amount for " + A + "\"}"
-		return result, errors.New(jsonResp)
+		return "", errors.New(jsonResp)
 	}
 
-	result = string(AValBytes)
 	jsonResp := "{\"Name\":\"" + A + "\",\"Amount\":\"" + string(AValBytes) + "\"}"
 	fmt.Printf("Query Response:%s\n", jsonResp)
-	return result, err
+	return string(AValBytes), err
 }
 
 func main() {
