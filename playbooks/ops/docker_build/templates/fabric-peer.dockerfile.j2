@@ -1,0 +1,7 @@
+FROM hyperledger/fabric-peer:{{ fabric.release }}
+
+LABEL maintainer="pantazheng@vip.qq.com"
+
+RUN sed -i "s@dl-cdn.alpinelinux.org/@mirrors.aliyun.com/@g" \
+    /etc/apk/repositories && apk update && apk upgrade && apk add coreutils && \
+    rm -rf /var/cache/apk/* && rm -rf /tmp/* && apk update

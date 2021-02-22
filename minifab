@@ -14,6 +14,9 @@ fi
 #   docker run --rm --name minifab -v /var/run/docker.sock:/var/run/docker.sock -v $(pwd)/vars:/home/vars \
 #   -e "ADDRS=$ADDRS" hyperledgerlabs/minifab:latest /home/main.sh "$@"
 # fi
+
+
+
 docker run --rm --name minifab                  \
     -v /var/run/docker.sock:/var/run/docker.sock  \
     -v "$(pwd)/plugins/callback/minifab.py:/usr/lib/python3.8/site-packages/ansible/plugins/callback/minifab.py" \
@@ -25,8 +28,10 @@ docker run --rm --name minifab                  \
     -v "$(pwd)/chaincode:/home/chaincode"         \
     -v "$(pwd)/client:/home/client"               \
     -v "$(pwd)/playbooks:/home/playbooks"         \
+    -v "$(pwd)/patch:/home/patch"         \
     -v "$(pwd)/scripts:/home/scripts"             \
     -v "$(pwd)/envsettings:/home/envsettings"     \
     -v "$(pwd)/ansible.cfg:/home/ansible.cfg"     \
     -v "$(pwd)/main.sh:/home/main.sh"             \
+    -v "$(pwd)/peer1.org0.example.com:/home/peer1.org0.example.com" \
     hyperledgerlabs/minifab:latest /home/main.sh "$@"

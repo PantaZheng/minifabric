@@ -1,0 +1,10 @@
+- name: Create dockerfile
+  template:
+    src: "{{ pjroot }}/playbooks/ops/docker_build/templates/{{ item }}.j2"
+    dest: "{{ pjroot }}/vars/run/{{ item }}"
+  with_items:
+    - "fabric-peer.dockerfile"
+
+- name: build dockerfile
+  command: >-
+    docker build -f /path/to/a/Dockerfile .
