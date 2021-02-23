@@ -18,9 +18,6 @@ export FABRIC_CFG_PATH=${PWD}
 export VERBOSE=false
 export DOCKER_API_VERSION=1.39
 
-sed -i "s@dl-cdn.alpinelinux.org/@mirrors.aliyun.com/@g" \
-    /etc/apk/repositories && apk update && apk upgrade && apk add coreutils
-
 . scripts/mainfuncs.sh
 
 MODE=$1

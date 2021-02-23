@@ -18,11 +18,7 @@
         CLINAME: "{{ (fabric.netname is defined) | ternary(fabric.netname, current_location_hash[:10]+'_cli') }}"
         NETNAME: "{{ (fabric.netname is defined) | ternary(fabric.netname, current_location_hash[:10]+'_net') }}"
 
-    - name: set timezone to Asia/Shanghai
-        timezone:
-          name: Asia/Shanghai
-
-    - name: Set endpoint address to first auto detected IP address 
+    - name: Set endpoint address to first auto detected IP address
       set_fact:
         endpoint_address: "{{ ADDRS.split(',')[0] }}"
       when: fabric.endpoint_address is undefined
@@ -59,7 +55,7 @@
       include_tasks: "playbooks/common/config_apply.yaml"
 
     - name: Check if external node endpoint exists
-      stat: 
+      stat:
         path: "{{ pjroot }}/vars/ext_node_vars.json"
       register: exflag
 
