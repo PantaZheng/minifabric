@@ -15,8 +15,8 @@
         current_location_hash: "{{ hostroot | hash('sha256') }}"
 
     - set_fact:
-        CLINAME: "{{ current_location_hash[:10] }}_cli"
-        NETNAME: "{{ current_location_hash[:10] }}_net"
+        CLINAME: "{{ (fabric.netname is defined) | ternary(fabric.netname, current_location_hash[:10]+'_cli') }}"
+        NETNAME: "{{ (fabric.netname is defined) | ternary(fabric.netname, current_location_hash[:10]+'_net') }}"
 
     - name: set timezone to Asia/Shanghai
         timezone:
@@ -37,6 +37,10 @@
         allops: "{{ allops | difference(['ccapprove', 'cccommit']) }}"
         OPNAMES: "{{ OPNAMES | combine({'ccinstantiate': 'cc instantiate'}) }}"
       when: IMAGETAG is version('2.0', '<')
+
+    - name: Setup container_options for appending docker run command
+      set_fact:
+        container_options: "{{ ( fabric.container_options is defined ) | ternary(fabric.container_options, '') }}"
 
     - meta: end_play
       when: allops|length == 0

@@ -137,7 +137,18 @@ Example `peer` section
 > peer1.org1.com --> mspid = org1-com, organization name = org1.com hostPort=7779  
 > peer0.org2.com --> mspid = org2-com, organization name = org2.com hostPort=7780  
 
-Currently **docket network** name is not configurable, it is automatically generated based on the working directory. This ensures that two different working directories will result in two different docker networks. This allows you to setup multiple sites on the same machine to mimic multiple organizations across multiple machines.
+In default, **docker network** is automatically generated based on the working directory. This ensures that two different working directories will result in two different docker networks. This allows you to setup multiple sites on the same machine to mimic multiple organizations across multiple machines.
+You can assign specific docker network name by uncomment bellow line in spec.yaml file. This allows you to setup fabric capability on the existing docker network easily. If you have multiple sites on same machine, it will be necessary to have different name for each site to avoid network conflict.
+
+```
+  # netname: "mysite0"
+```
+
+You can add options for starting containers by uncomment bellow line in spec.yaml file. you can specify any option which supported by 'docker run' command.
+Note that the value specified by container_options will be added when minifabric starts all node type containers (CA, peer, orderer, cli) without distinction.
+```
+  # container_options: "--restart=always --log-opt max-size=10m --log-opt max-file=3"
+```
 
 ### Install your own chaincode
 To install your own chaincode, create the following subdirectory in your working directory:

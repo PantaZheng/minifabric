@@ -1,6 +1,6 @@
 # Minifabric 
 
-[![Build Status](https://dev.azure.com/Hyperledger/Hyperledger%20Labs/_apis/build/status/hyperledger-labs.minifabric?branchName=master)](https://dev.azure.com/Hyperledger/Hyperledger%20Labs/_build/latest?definitionId=131&branchName=master)
+![MiniFab CI](https://github.com/hyperledger-labs/minifabric/workflows/MiniFab%20CI/badge.svg)
 [![Chat](https://raw.githubusercontent.com/hyperledger/chat-assets/master/fabric-mini.svg)](https://chat.hyperledger.org/channel/fabric-mini)
 
 [中文](https://github.com/hyperledger-labs/minifabric/blob/master/README.zh.md)
@@ -10,7 +10,7 @@ just want to get a feel of Hyperledger Fabric, Minifabric is the tool to
 get you started. Minifabric can stand up a Fabric network on a small machine
 like a VirtualBox VM but can also deploy Fabric networks across multiple production
 grade servers. Minifabric has been tested on Linux, OS X, Windows 10 and supports
-Fabric releases 1.4.1 or newer.
+Fabric releases 1.4.4 or newer.
 
 ## Feature Highlight
 

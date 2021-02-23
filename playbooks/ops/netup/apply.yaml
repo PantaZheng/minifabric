@@ -12,7 +12,7 @@
   command: >-
     docker volume create {{ item.fullname }}
   with_items:
-    - "{{ allpeers + allorderers }}"
+    - "{{ ((DB_TYPE|lower) == 'couchdb') | ternary(allpeers+allorderers+allcas+allcouchdbs, allpeers+allorderers+allcas) }}"
 
 - name: "Process keys"
   include_tasks: "{{ pjroot }}/playbooks/common/processkeys.yaml"
@@ -32,6 +32,8 @@
     docker run -d --network {{ NETNAME }} --name {{ item.fullname }} {{ item.portmap }}
     -e COUCHDB_USER=admin -e COUCHDB_PASSWORD=adminpw
     -e TZ="Asia/Shanghai"
+    -v {{ item.fullname }}:/opt/couchdb/data
+    {{ container_options }}
     --hostname {{ item.fullname }} hyperledger/fabric-couchdb:latest
   with_items: "{{ allcouchdbs }}"
   when: (DB_TYPE|lower) == "couchdb"
@@ -52,6 +54,8 @@
     -v {{ hostroot }}/vars/run/peer.sh:/var/patch/peer.sh
     -e TZ="Asia/Shanghai"
     hyperledger/fabric-peer:{{ fabric.release }} sh /var/patch/peer.sh
+    {{ container_options }}
+    hyperledger/fabric-peer:{{ fabric.release }} peer node start
   with_items: "{{ allpeers }}"
   register: peerstat
   ignore_errors: yes
@@ -79,6 +83,7 @@
     -v {{ mpath }}/{{item.org}}/orderers/{{item.fullname}}/tls:/var/hyperledger/orderer/tls
     -v {{ item.fullname }}:/var/hyperledger/production/orderer
     -e TZ="Asia/Shanghai"
+    {{ container_options }}
     hyperledger/fabric-orderer:{{ fabric.release }}
   with_items: "{{ allorderers }}"
   register: ordererstat
@@ -103,7 +108,9 @@
     docker run -d --network {{ NETNAME }} --name {{ item.fullname }} --hostname {{ item.fullname }}
     --env-file {{ pjroot }}/vars/run/{{ item.fullname }}.env {{ item.portmap }}
     -v {{ hostroot }}/vars/keyfiles/{{ orgattrs[item.org].certpath }}/{{item.org}}:/certs
+    -v {{ item.fullname }}:/etc/hyperledger/fabric-ca-server
     -e TZ="Asia/Shanghai"
+    {{ container_options }}
     hyperledger/fabric-ca:{{ desiredrelease }}
   with_items: "{{ allcas }}"
   register: castat
@@ -130,6 +137,7 @@
     -v {{ hostroot }}/vars:/vars
     -v {{ hostroot }}/vars/chaincode:{{ gopath }}/src/github.com/chaincode
     -e TZ="Asia/Shanghai"
+    {{ container_options }}
     hyperledger/fabric-tools:{{ fabric.release }}
 
 - name: Check if orderer raft leader node has been elected
