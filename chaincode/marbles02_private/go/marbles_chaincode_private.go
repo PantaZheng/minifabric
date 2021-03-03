@@ -419,7 +419,7 @@ func (s *SmartContract) GetMarblesByRange(ctx contractapi.TransactionContextInte
 	}
 	defer resultsIterator.Close()
 
-	results := []Marble{}
+	var results []Marble
 
 	for resultsIterator.HasNext() {
 		response, err := resultsIterator.Next()
@@ -501,7 +501,7 @@ func (s *SmartContract) getQueryResultForQueryString(ctx contractapi.Transaction
 	}
 	defer resultsIterator.Close()
 
-	results := []Marble{}
+	var results []Marble
 
 	for resultsIterator.HasNext() {
 		response, err := resultsIterator.Next()

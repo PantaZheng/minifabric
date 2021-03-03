@@ -76,7 +76,11 @@ func (cp *CommercialPaper) UnmarshalJSON(data []byte) error {
 
 // MarshalJSON special handler for managing JSON marshalling
 func (cp CommercialPaper) MarshalJSON() ([]byte, error) {
-	jcp := jsonCommercialPaper{commercialPaperAlias: (*commercialPaperAlias)(&cp), State: cp.state, Class: "org.papernet.commercialpaper", Key: ledgerapi.MakeKey(cp.Issuer, cp.PaperNumber)}
+	jcp := jsonCommercialPaper{
+		commercialPaperAlias: (*commercialPaperAlias)(&cp),
+		State: cp.state,
+		Class: "org.papernet.commercialpaper",
+		Key: ledgerapi.MakeKey(cp.Issuer, cp.PaperNumber)}
 
 	return json.Marshal(&jcp)
 }
