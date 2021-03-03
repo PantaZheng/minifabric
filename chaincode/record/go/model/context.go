@@ -1,8 +1,10 @@
 package model
 
 import (
-	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	"marbles/store"
+
+	"github.com/hyperledger/fabric-contract-api-go/contractapi"
+	"github.com/pantazheng/minifabric/chaincode/record/store"
 )
 
 type TransactionContextInterface interface {
