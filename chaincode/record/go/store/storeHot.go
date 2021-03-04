@@ -3,7 +3,6 @@ package store
 import (
 	"encoding/json"
 	"fmt"
-	"marbles/model"
 	"strings"
 
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
@@ -11,28 +10,37 @@ import (
 
 const collectionName = "hot_records"
 
-var emptyValue = []byte{0x00}
+var emptyValue []byte
+
+//type RetentionPolicy struct {
+//	StartTime timestamp.Timestamp `json:"start_time"`
+//	Interval  int64               `json:"interval"`
+//}
 
 type Record struct {
-	ID          string  `json:"device_id"`
 	Timestamp   string  `json:"timestamp"`
+	DeviceID    string  `json:"device_id"`
 	Temperature float64 `json:"temperature"`
+}
+
+func (r *Record) makePrimaryKey() string {
+	return strings.Join([]string{r.Timestamp, r.DeviceID}, "_")
 }
 
 type HotStoreInterface interface {
 	AddRecord() error
-	GetRecord(timestamp string, id string) (*Record, error)
-	GetRecordHash(timestamp string, id string) (string, error)
-	GetRecordsByRange(startKey string, endKey string) ([]Record, error)
+	GetRecord(record *Record) error
+	//GetRecordHash(timestamp, id string) (string, error)
+	//GetRecordsByRange(startKey, endKey string) ([]Record, error)
 }
 
 type hotStore struct {
 	Ctx contractapi.TransactionContextInterface
 }
 
-func (hs *hotStore) makePrimaryKey(timestamp string, id string) string {
-	return strings.Join([]string{timestamp, id}, "_")
-}
+//func (hs *hotStore) archive() error {
+//	files, _ := ioutil.ReadDir("./")
+//}
 
 func (hs *hotStore) AddRecord() error {
 	transMap, err := hs.Ctx.GetStub().GetTransient()
@@ -51,19 +59,15 @@ func (hs *hotStore) AddRecord() error {
 		return fmt.Errorf("failed to unmarshal JSON: %s", err.Error())
 	}
 
-	if len(recordInput.ID) == 0 {
+	if len(recordInput.DeviceID) == 0 {
 		return fmt.Errorf("id field must be a non-empty string")
-	}
-
-	if len(recordInput.Timestamp) == 0 {
-		return fmt.Errorf("timestamp field must be a non-empty string")
 	}
 
 	if recordInput.Temperature < 0 || recordInput.Temperature > 100 {
 		return fmt.Errorf("temperature field must between 0 ~ 100")
 	}
 
-	primaryKey := hs.makePrimaryKey(recordInput.Timestamp, recordInput.ID)
+	primaryKey := recordInput.makePrimaryKey()
 	// 检查重复
 	recordAsBytes, err := hs.Ctx.GetStub().GetPrivateData(collectionName, primaryKey)
 	if err != nil {
@@ -74,7 +78,7 @@ func (hs *hotStore) AddRecord() error {
 	}
 
 	hotRecord := &Record{
-		ID:          recordInput.ID,
+		DeviceID:    recordInput.DeviceID,
 		Timestamp:   recordInput.Timestamp,
 		Temperature: recordInput.Temperature,
 	}
@@ -92,7 +96,7 @@ func (hs *hotStore) AddRecord() error {
 
 	// 时序索引
 	indexName := "timestamp~id"
-	timeIndex, err := hs.Ctx.GetStub().CreateCompositeKey(indexName, []string{recordInput.Timestamp, recordInput.ID})
+	timeIndex, err := hs.Ctx.GetStub().CreateCompositeKey(indexName, []string{recordInput.Timestamp, recordInput.DeviceID})
 	if err != nil {
 		return err
 	}
@@ -101,64 +105,66 @@ func (hs *hotStore) AddRecord() error {
 	return err
 }
 
-func (hs *hotStore) GetRecord(timestamp string, id string) (*Record, error) {
-	primaryKey := hs.makePrimaryKey(timestamp, id)
+func (hs *hotStore) GetRecord(record *Record) error {
+	primaryKey := record.makePrimaryKey()
 	recordAsBytes, err := hs.Ctx.GetStub().GetPrivateData(collectionName, primaryKey)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read from marble %s", err.Error())
+		return fmt.Errorf("failed to read from marble %s", err.Error())
 	}
 	if recordAsBytes == nil {
-		return nil, fmt.Errorf("%s does not exist", primaryKey)
+		return fmt.Errorf("%s does not exist", primaryKey)
 	}
 
-	record := new(Record)
 	err = json.Unmarshal(recordAsBytes, record)
-
-	return record, err
+	return err
 }
 
-func (hs *hotStore) GetRecordHash(timestamp string, id string) (string, error) {
-	primaryKey := hs.makePrimaryKey(timestamp, id)
-	hashAsBytes, err := hs.Ctx.GetStub().GetPrivateDataHash(collectionName, primaryKey)
-	if err != nil {
-		return "", fmt.Errorf("Failed to get public data hash for record:" + err.Error())
-	} else if hashAsBytes == nil {
-		return "", fmt.Errorf("Record does not exist: " + primaryKey)
-	}
+//func (hs *hotStore) GetRecordHash(timestamp, id string) (string, error) {
+//	r := Record{
+//		Timestamp: timestamp,
+//		DeviceID:        id,
+//	}
+//	primaryKey := r.makePrimaryKey()
+//	hashAsBytes, err := hs.Ctx.GetStub().GetPrivateDataHash(collectionName, primaryKey)
+//	if err != nil {
+//		return "", fmt.Errorf("Failed to get public data hash for record:" + err.Error())
+//	} else if hashAsBytes == nil {
+//		return "", fmt.Errorf("Record does not exist: " + primaryKey)
+//	}
+//
+//	return string(hashAsBytes), nil
+//}
 
-	return string(hashAsBytes), nil
-}
+//func (hs *hotStore) GetRecordsByRange(startKey, endKey string) ([]Record, error) {
+//	iterator, err := hs.Ctx.GetStub().GetPrivateDataByRange(collectionName, startKey, endKey)
+//	if err != nil {
+//		return nil, err
+//	}
+//	defer func() {
+//		_ = iterator.Close()
+//	}()
+//
+//	var records []Record
+//
+//	for iterator.HasNext() {
+//		currentItem, err := iterator.Next()
+//		if err != nil {
+//			return nil, err
+//		}
+//
+//		newRecord := new(Record)
+//		err = json.Unmarshal(currentItem.Value, newRecord)
+//		if err != nil {
+//			return nil, err
+//		}
+//
+//		records = append(records, *newRecord)
+//	}
+//
+//	return records, nil
+//}
 
-func (hs *hotStore) GetRecordsByRange(startKey string, endKey string) ([]Record, error) {
-	iterator, err := hs.Ctx.GetStub().GetPrivateDataByRange(collectionName, startKey, endKey)
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		_ = iterator.Close()
-	}()
-
-	var records []Record
-
-	for iterator.HasNext() {
-		currentItem, err := iterator.Next()
-		if err != nil {
-			return nil, err
-		}
-
-		newRecord := new(Record)
-		err = json.Unmarshal(currentItem.Value, newRecord)
-		if err != nil {
-			return nil, err
-		}
-
-		records = append(records, *newRecord)
-	}
-
-	return records, nil
-}
-
-func newHotStore(ctx model.TransactionContextInterface) *hotStore {
+func newHotStore(ctx contractapi.TransactionContextInterface) *hotStore {
 	store := new(hotStore)
 	store.Ctx = ctx
 	return store

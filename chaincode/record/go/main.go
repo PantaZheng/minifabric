@@ -2,13 +2,14 @@ package main
 
 import (
 	"fmt"
+	"record/store"
+
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
-	"marbles/model"
 )
 
 func main() {
 
-	chaincode, err := contractapi.NewChaincode(new(model.SmartContract))
+	chaincode, err := contractapi.NewChaincode(new(store.Contract))
 
 	if err != nil {
 		fmt.Printf("Error creating private record chaincode: %s", err.Error())

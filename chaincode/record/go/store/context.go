@@ -1,15 +1,13 @@
-package model
+package store
 
 import (
-	"marbles/store"
-
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
-	"github.com/pantazheng/minifabric/chaincode/record/store"
 )
 
 type TransactionContextInterface interface {
 	contractapi.TransactionContextInterface
-	GetHotStore() store.HotStoreInterface
+	GetHotStore() HotStoreInterface
+	GetColdStore() ColdStoreInterface
 }
 
 // TransactionContext implementation of
@@ -17,14 +15,21 @@ type TransactionContextInterface interface {
 // commercial paper contract
 type TransactionContext struct {
 	contractapi.TransactionContext
-	coldStore *store.coldStore
-	hotStore  *store.hotStore
+	coldStore *coldStore
+	hotStore  *hotStore
 }
 
-func (tc *TransactionContext) GetHotStore() store.HotStoreInterface {
+func (tc *TransactionContext) GetHotStore() HotStoreInterface {
 	if tc.hotStore == nil {
-		tc.hotStore = store.newHotStore(tc)
+		tc.hotStore = newHotStore(tc)
 	}
-
 	return tc.hotStore
 }
+
+func (tc *TransactionContext) GetColdStore() ColdStoreInterface {
+	if tc.coldStore == nil {
+		tc.coldStore = newColdStore(tc)
+	}
+	return tc.coldStore
+}
+
