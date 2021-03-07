@@ -38,11 +38,6 @@
   with_items: "{{ allcouchdbs }}"
   when: (DB_TYPE|lower) == "couchdb"
 
-- name: copy peer patch
-  copy:
-    src: "{{ pjroot }}/patch/peer.sh"
-    dest: "{{ pjroot }}/vars/run/peer.sh"
-
 - name: Start all peer nodes
   command: >-
     docker run -d --network {{ NETNAME }} --name {{ item.fullname }} --hostname {{ item.fullname }}
@@ -51,10 +46,9 @@
     -v {{ mpath }}/{{item.org}}/peers/{{item.fullname}}/msp:/etc/hyperledger/fabric/msp
     -v {{ mpath }}/{{item.org}}/peers/{{item.fullname}}/tls:/etc/hyperledger/fabric/tls
     -v {{ item.fullname }}:/var/hyperledger/production
-    -v {{ hostroot }}/vars/run/peer.sh:/var/patch/peer.sh
     -e TZ="Asia/Shanghai"
     {{ container_options }}
-    hyperledger/fabric-peer:{{ fabric.release }} sh /var/patch/peer.sh
+    hyperledger/fabric-peer:{{ fabric.release }} peer node start
   with_items: "{{ allpeers }}"
   register: peerstat
   ignore_errors: yes

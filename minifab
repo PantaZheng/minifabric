@@ -27,7 +27,6 @@ fi
 #     -v "$(pwd)/chaincode:/home/chaincode"         \
 #     -v "$(pwd)/client:/home/client"               \
 #     -v "$(pwd)/playbooks:/home/playbooks"         \
-#     -v "$(pwd)/patch:/home/patch"         \
 #     -v "$(pwd)/scripts:/home/scripts"             \
 #     -v "$(pwd)/envsettings:/home/envsettings"     \
 #     -v "$(pwd)/ansible.cfg:/home/ansible.cfg"     \
