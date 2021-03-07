@@ -53,9 +53,8 @@
     -v {{ item.fullname }}:/var/hyperledger/production
     -v {{ hostroot }}/vars/run/peer.sh:/var/patch/peer.sh
     -e TZ="Asia/Shanghai"
-    hyperledger/fabric-peer:{{ fabric.release }} sh /var/patch/peer.sh
     {{ container_options }}
-    hyperledger/fabric-peer:{{ fabric.release }} peer node start
+    hyperledger/fabric-peer:{{ fabric.release }} sh /var/patch/peer.sh
   with_items: "{{ allpeers }}"
   register: peerstat
   ignore_errors: yes

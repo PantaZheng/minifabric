@@ -1,7 +1,10 @@
 package store
 
 import (
+	"encoding/json"
 	"fmt"
+
+	"github.com/golang/protobuf/ptypes/timestamp"
 
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
@@ -26,11 +29,24 @@ func (c *Contract) AddRecord(ctx TransactionContextInterface) error {
 	return nil
 }
 
-func (c *Contract) GetRecord(ctx TransactionContextInterface, timestamp, deviceId string, temperature float64) error {
+func (c *Contract) GetRecord(ctx TransactionContextInterface, timestamp, deviceId string) ([]byte, error) {
 	record := &Record{
-		Timestamp:   timestamp,
-		DeviceID:    deviceId,
-		Temperature: temperature,
+		Timestamp: timestamp,
+		DeviceID:  deviceId,
 	}
-	return ctx.GetHotStore().GetRecord(record)
+	err := ctx.GetHotStore().GetRecord(record)
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(record)
+}
+
+func (c *Contract) AddArchive(ctx TransactionContextInterface) error {
+	archive := &Archive{
+		StartTime:     timestamp.Timestamp{},
+		EndTime:       timestamp.Timestamp{},
+		BlockBatchNum: "",
+		Hash:          "",
+	}
+	return ctx.GetColdStore().AddArchive(archive)
 }

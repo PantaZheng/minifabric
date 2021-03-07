@@ -15,8 +15,8 @@ type TransactionContextInterface interface {
 // commercial paper contract
 type TransactionContext struct {
 	contractapi.TransactionContext
-	coldStore *coldStore
 	hotStore  *hotStore
+	coldStore *coldStore
 }
 
 func (tc *TransactionContext) GetHotStore() HotStoreInterface {
@@ -32,4 +32,3 @@ func (tc *TransactionContext) GetColdStore() ColdStoreInterface {
 	}
 	return tc.coldStore
 }
-

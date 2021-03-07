@@ -35,9 +35,10 @@ fi
 #     -v "$(pwd)/peer1.org0.example.com:/home/peer1.org0.example.com" \
 #     hyperledgerlabs/minifab:latest /home/main.sh "$@"
 
-docker run --rm --name minifab                  \
+docker run --rm --name minifab                    \
     -v /var/run/docker.sock:/var/run/docker.sock  \
     -v "$(pwd)/vars:/home/vars"                   \
     -e "ADDRS=${ADDRS}"                           \
-    -v /etc/localtime:/etc/localtime \
+    -v "$(pwd)/playbooks:/home/playbooks"         \
+    -v /etc/localtime:/etc/localtime              \
     registry.cn-qingdao.aliyuncs.com/pantazheng/minifab:latest /home/main.sh "$@"

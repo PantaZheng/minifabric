@@ -8,8 +8,9 @@ import (
 )
 
 func main() {
-
-	chaincode, err := contractapi.NewChaincode(new(store.Contract))
+	contract := new(store.Contract)
+	contract.TransactionContextHandler = new(store.TransactionContext)
+	chaincode, err := contractapi.NewChaincode(contract)
 
 	if err != nil {
 		fmt.Printf("Error creating private record chaincode: %s", err.Error())

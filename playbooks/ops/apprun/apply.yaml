@@ -1,7 +1,7 @@
 ---
 - name: Set up app sdk release
   set_fact:
-    APP_LANGUAGE: "node"
+    APP_LANGUAGE: "go"
 
 - name: Set up app dir
   set_fact:

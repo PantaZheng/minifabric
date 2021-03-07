@@ -8,7 +8,7 @@ import (
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
 
-const collectionName = "hot_records"
+const collectionName = "collectionPrivate"
 
 var emptyValue []byte
 
@@ -101,6 +101,8 @@ func (hs *hotStore) AddRecord() error {
 		return err
 	}
 	err = hs.Ctx.GetStub().PutPrivateData(collectionName, timeIndex, emptyValue)
+
+	fmt.Println("recordInput:", recordInput)
 
 	return err
 }
