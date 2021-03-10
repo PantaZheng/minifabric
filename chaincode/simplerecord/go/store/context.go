@@ -15,7 +15,7 @@ type TransactionContextInterface interface {
 // commercial paper contract
 type TransactionContext struct {
 	contractapi.TransactionContext
-	hotStore  *recordStore
+	hotStore  *hotStore
 	coldStore *coldStore
 }
 

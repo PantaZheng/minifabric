@@ -30,12 +30,12 @@ connections to Fabric network
 */
 
 type Record struct {
-	Timestamp   string  `json:"timestamp"`
-	DeviceID    string  `json:"device_id"`
-	Temperature float64 `json:"temperature"`
+	Timestamp string  `json:"timestamp"`
+	Data      float64 `json:"data"`
 }
 
-func addRecord(contract *gateway.Contract, record *Record) error {
+func addRecord(network *gateway.Network, record *Record) error {
+	contract := network.GetContract(ccID)
 	recordJSON, err := json.Marshal(record)
 	if err != nil {
 		return err
@@ -46,6 +46,19 @@ func addRecord(contract *gateway.Contract, record *Record) error {
 	tx, err := contract.CreateTransaction("AddRecord", gateway.WithTransient(transient))
 	if err != nil {
 		return fmt.Errorf("failed to create transaction: %v", err.Error())
+	}
+	_, err = tx.Submit()
+	if err != nil {
+		return fmt.Errorf("failed to submit transaction: %v", err.Error())
+	}
+	return nil
+}
+
+func getChainCodeInfo(network *gateway.Network) error {
+	contract := network.GetContract("qscc")
+	tx, err := contract.CreateTransaction("GetChainInfo")
+	if err != nil {
+		return fmt.Errorf("failed to create GetChainCode Infotransaction: %v", err.Error())
 	}
 	_, err = tx.Submit()
 	if err != nil {
@@ -92,20 +105,23 @@ func useWalletGateway() {
 	var wg sync.WaitGroup
 	start := time.Now()
 	recordTime := start.Unix()
-	for i := 0; i < 10000; i++ {
+	for i := 0; i < 2000; i++ {
 		wg.Add(1)
 		record := &Record{
-			Timestamp:   strconv.FormatInt(recordTime, 10),
-			DeviceID:    strconv.FormatInt(int64(seededRand.Intn(20)), 10),
-			Temperature: seededRand.Float64(),
+			Timestamp: strconv.FormatInt(recordTime, 10),
+			DeviceID:  strconv.FormatInt(int64(seededRand.Intn(20)), 10),
+			Data:      seededRand.Float64(),
 		}
-		func() {
+		go func() {
 			defer wg.Done()
 			if err := addRecord(contract, record); err != nil {
 				logger.Println("addRecord error", err.Error())
 			}
 		}()
-		recordTime += 1
+		recordTime++
+	}
+	if err := getChainCodeInfo(contract); err != nil {
+		logger.Println("getRecord error", err.Error())
 	}
 	wg.Wait()
 	logger.Info("The time took is ", time.Now().Sub(start))

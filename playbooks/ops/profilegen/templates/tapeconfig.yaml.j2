@@ -1,0 +1,42 @@
+{%  set orgcas = allcas|selectattr('org', 'equalto', CURRENT_ORG)|list %}
+{%  set org = CURRENT_ORG %}
+# Definition of nodes
+{% for peer in allpeers %}
+{{ peer.fullname }}: &{{ peer.fullname }}
+  addr: {{ peer.url }}:{{ peer.port }}
+  tls_ca_cert: {{ pjroot }}/vars/keyfiles/peerOrganizations/{{ peer.org }}/peers/{{ peer.fullname }}/tls/ca.crt
+{% endfor %}
+
+orderers:
+{% for orderer in allorderers %}
+{{ orderer.fullname }}: &{{ orderer.fullname }}
+  addr: {{ orderer.url }}:{{ orderer.port }}
+  tls_ca_cert: {{ pjroot }}/vars/keyfiles/ordererOrganizations/{{ orderer.org }}/orderers/{{ orderer.fullname }}/tls/ca.crt
+{% endfor %}
+
+# Nodes to interact with
+endorsers:
+{% for peer in allpeers %}
+  - *{{ peer.fullname }}
+{% endfor %}
+# we might support multi-committer in the future for more complex test scenario,
+# i.e. consider tx committed only if it's done on >50% of nodes. But for now,
+# it seems sufficient to support single committer.
+committers:
+{% for peer in allpeers %}
+  - *{{ peer.fullname }}
+{% endfor %}
+commitThreshold: 4
+{% set oneorderer=allorderers|random %}
+orderer: *{{ oneorderer.fullname }}
+
+# Invocation configs
+channel: {{ CHANNEL_NAME }}
+chaincode: {{ CC_NAME }}
+args:
+  - GetAllAssets
+mspid: {{ org.split('.')|join('-') }}
+private_key: {{ lookup('file', pjroot+'/vars/keyfiles/peerOrganizations/'+org+'/users/Admin@'+org+'/msp/keystore/priv_sk')|regex_replace('(\n)', '\\\\n') }}
+sign_cert: {{ lookup('file',pjroot+'/vars/keyfiles/peerOrganizations/'+org+'/users/Admin@'+org+'/msp/signcerts/Admin@'+org+'cert.pem')|regex_replace('(\n)', '\\\\n') }}
+num_of_conn: 40
+client_per_conn: 40

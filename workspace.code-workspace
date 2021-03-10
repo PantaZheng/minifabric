@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "chaincode/recordcc/go"
+		},
+		{
+			"path": "app/recordcc/go"
+		}
+	],
+	"settings": {}
+}

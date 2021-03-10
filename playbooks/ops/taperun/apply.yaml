@@ -1,0 +1,50 @@
+---
+- name: Set up app sdk release
+  set_fact:
+    APP_LANGUAGE: "go"
+
+- name: Set up app dir
+  set_fact:
+    APP_DIR: "/go/src/github.com/app"
+
+- name: Create apprun script
+  template:
+    src: "{{ pjroot }}/playbooks/ops/templates/apprun.sh.j2"
+    dest: "{{ pjroot }}/vars/run/apprun.sh"
+    mode: +x
+
+- name: Change var file permission
+  command: >-
+    chown -R 1000:1000 {{ pjroot }}/vars/app/{{ CC_NAME }}
+
+- name: Copy APP files
+  command: "{{ item }}"
+  with_items:
+    - 'cp {{ pjroot }}/vars/profiles/{{ CHANNEL_NAME }}_connection.yaml
+      {{ pjroot }}/vars/app/{{ CC_NAME }}/{{ APP_LANGUAGE }}/profiles/connection.yaml'
+    - 'cp {{ pjroot }}/vars/profiles/vscode/wallets/{{ CURRENT_ORG }}/Admin.id
+      {{ pjroot }}/vars/app/{{ CC_NAME }}/{{ APP_LANGUAGE }}/profiles/wallets/Admin.id'
+
+
+- name: Run the chaincode application
+  command: >-
+    docker run --network {{ NETNAME }} --name apprun --hostname apprun
+    -v /var/run/docker.sock:/var/run/docker.sock
+    -v {{ hostroot }}/vars/app/{{ CC_NAME }}/{{ APP_LANGUAGE }}:{{ APP_DIR }}
+    -v {{ hostroot }}/vars/run/apprun.sh:/vars/run/apprun.sh
+    -e TZ="Asia/Shanghai"
+    --entrypoint /vars/run/apprun.sh
+    {{ LANGUAGEENVS[APP_LANGUAGE] }}
+  register: runstates
+
+- name: App run
+  when: runstates.rc != 0
+  debug:
+    msg: "{{  runstates.stderr_lines }}"
+  tags: [ print_action ]
+
+- name: App run
+  when: runstates.rc == 0
+  debug:
+    msg: "Application in {{ APP_LANGUAGE }} completed successfully"
+  tags: [ print_action ]

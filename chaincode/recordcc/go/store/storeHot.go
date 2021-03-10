@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/golang/protobuf/ptypes/timestamp"
+
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
 
@@ -17,33 +19,48 @@ var emptyValue []byte
 //	Interval  int64               `json:"interval"`
 //}
 
+type Point struct {
+	Timestamp   timestamp.Timestamp `json:"timestamp"`
+	Temperature float64             `json:"temperature"`
+}
+
 type Record struct {
-	Timestamp   string  `json:"timestamp"`
-	DeviceID    string  `json:"device_id"`
-	Temperature float64 `json:"temperature"`
+	Timestamp timestamp.Timestamp `json:"timestamp"`
+	Points    []Point             `json:"points"`
+	ClientID  string              `json:"client_id"`
 }
 
 func (r *Record) makePrimaryKey() string {
-	return strings.Join([]string{r.Timestamp, r.DeviceID}, "_")
+	return strings.Join([]string{r.Timestamp, r.ClientID}, "_")
 }
 
 type HotStoreInterface interface {
-	AddRecord() error
-	GetRecord(record *Record) error
-	//GetRecordHash(timestamp, id string) (string, error)
+	AddPvtRecord() error
+	GetPvtRecord(record *Record) error
+	GetPvtRecordHash(record *Record) (string, error)
 	//GetRecordsByRange(startKey, endKey string) ([]Record, error)
 }
 
-type hotStore struct {
-	Ctx contractapi.TransactionContextInterface
+type recordStore struct {
+	Ctx    contractapi.TransactionContextInterface
+	Points []Point
 }
 
-//func (hs *hotStore) archive() error {
+//func (hs *recordStore) archive() error {
 //	files, _ := ioutil.ReadDir("./")
 //}
 
-func (hs *hotStore) AddRecord() error {
-	transMap, err := hs.Ctx.GetStub().GetTransient()
+func (rs *recordStore) AddPoint() error {
+	peer_id, err := rs.Ctx.GetClientIdentity().GetID()
+
+}
+
+func (rs *recordStore) newRecord() error {
+
+}
+
+func (rs *recordStore) AddPvtRecord() error {
+	transMap, err := rs.Ctx.GetStub().GetTransient()
 	if err != nil {
 		return fmt.Errorf("Error getting transient: " + err.Error())
 	}
@@ -59,17 +76,13 @@ func (hs *hotStore) AddRecord() error {
 		return fmt.Errorf("failed to unmarshal JSON: %s", err.Error())
 	}
 
-	if len(recordInput.DeviceID) == 0 {
-		return fmt.Errorf("id field must be a non-empty string")
-	}
-
-	if recordInput.Temperature < 0 || recordInput.Temperature > 100 {
-		return fmt.Errorf("temperature field must between 0 ~ 100")
+	if len(recordInput.UUID) == 0 {
+		return fmt.Errorf("uuid field must be a non-empty string")
 	}
 
 	primaryKey := recordInput.makePrimaryKey()
 	// 检查重复
-	recordAsBytes, err := hs.Ctx.GetStub().GetPrivateData(collectionName, primaryKey)
+	recordAsBytes, err := rs.Ctx.GetStub().GetPrivateData(collectionName, primaryKey)
 	if err != nil {
 		return fmt.Errorf("Failed to get recordInput: " + err.Error())
 	} else if recordAsBytes != nil {
@@ -78,9 +91,9 @@ func (hs *hotStore) AddRecord() error {
 	}
 
 	hotRecord := &Record{
-		DeviceID:    recordInput.DeviceID,
-		Timestamp:   recordInput.Timestamp,
-		Temperature: recordInput.Temperature,
+		UUID:      recordInput.UUID,
+		Timestamp: recordInput.Timestamp,
+		Data:      recordInput.Data,
 	}
 
 	hotRecordJSON, err := json.Marshal(hotRecord)
@@ -89,27 +102,27 @@ func (hs *hotStore) AddRecord() error {
 	}
 
 	// 保存热点记录到状态库
-	err = hs.Ctx.GetStub().PutPrivateData(collectionName, primaryKey, hotRecordJSON)
+	err = rs.Ctx.GetStub().PutPrivateData(collectionName, primaryKey, hotRecordJSON)
 	if err != nil {
 		return fmt.Errorf("failed to put hot record: %s", err.Error())
 	}
 
-	// 时序索引
-	indexName := "timestamp~id"
-	timeIndex, err := hs.Ctx.GetStub().CreateCompositeKey(indexName, []string{recordInput.Timestamp, recordInput.DeviceID})
+	// timestamp
+	indexName := "uuid"
+	timeIndex, err := rs.Ctx.GetStub().CreateCompositeKey(indexName, []string{recordInput.UUID})
 	if err != nil {
 		return err
 	}
-	err = hs.Ctx.GetStub().PutPrivateData(collectionName, timeIndex, emptyValue)
+	err = rs.Ctx.GetStub().PutPrivateData(collectionName, timeIndex, emptyValue)
 
 	fmt.Println("recordInput:", recordInput)
 
 	return err
 }
 
-func (hs *hotStore) GetRecord(record *Record) error {
+func (rs *recordStore) GetPvtRecord(record *Record) error {
 	primaryKey := record.makePrimaryKey()
-	recordAsBytes, err := hs.Ctx.GetStub().GetPrivateData(collectionName, primaryKey)
+	recordAsBytes, err := rs.Ctx.GetStub().GetPrivateData(collectionName, primaryKey)
 	if err != nil {
 		return fmt.Errorf("failed to read from marble %s", err.Error())
 	}
@@ -121,53 +134,54 @@ func (hs *hotStore) GetRecord(record *Record) error {
 	return err
 }
 
-//func (hs *hotStore) GetRecordHash(timestamp, id string) (string, error) {
-//	r := Record{
-//		Timestamp: timestamp,
-//		DeviceID:        id,
-//	}
-//	primaryKey := r.makePrimaryKey()
-//	hashAsBytes, err := hs.Ctx.GetStub().GetPrivateDataHash(collectionName, primaryKey)
-//	if err != nil {
-//		return "", fmt.Errorf("Failed to get public data hash for record:" + err.Error())
-//	} else if hashAsBytes == nil {
-//		return "", fmt.Errorf("Record does not exist: " + primaryKey)
-//	}
-//
-//	return string(hashAsBytes), nil
-//}
+func (rs *recordStore) GetPvtRecordHash(record *Record) (string, error) {
+	primaryKey := record.makePrimaryKey()
+	hashAsBytes, err := rs.Ctx.GetStub().GetPrivateDataHash(collectionName, primaryKey)
+	if err != nil {
+		return "", fmt.Errorf("Failed to get private data hash for record:" + err.Error())
+	} else if hashAsBytes == nil {
+		return "", fmt.Errorf("Record does not exist: " + primaryKey)
+	}
 
-//func (hs *hotStore) GetRecordsByRange(startKey, endKey string) ([]Record, error) {
-//	iterator, err := hs.Ctx.GetStub().GetPrivateDataByRange(collectionName, startKey, endKey)
-//	if err != nil {
-//		return nil, err
-//	}
-//	defer func() {
-//		_ = iterator.Close()
-//	}()
-//
-//	var records []Record
-//
-//	for iterator.HasNext() {
-//		currentItem, err := iterator.Next()
-//		if err != nil {
-//			return nil, err
-//		}
-//
-//		newRecord := new(Record)
-//		err = json.Unmarshal(currentItem.Value, newRecord)
-//		if err != nil {
-//			return nil, err
-//		}
-//
-//		records = append(records, *newRecord)
-//	}
-//
-//	return records, nil
-//}
+	return string(hashAsBytes), nil
+}
 
-func newHotStore(ctx contractapi.TransactionContextInterface) *hotStore {
-	store := new(hotStore)
+func (rs *recordStore) GetRecordsByRange(startKey, endKey string) ([]Record, error) {
+	iterator, err := rs.Ctx.GetStub().GetPrivateDataByRange(collectionName, startKey, endKey)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		_ = iterator.Close()
+	}()
+
+	var records []Record
+
+	for iterator.HasNext() {
+		currentItem, err := iterator.Next()
+		if err != nil {
+			return nil, err
+		}
+
+		newRecord := new(Record)
+		err = json.Unmarshal(currentItem.Value, newRecord)
+		if err != nil {
+			return nil, err
+		}
+
+		records = append(records, *newRecord)
+	}
+
+	return records, nil
+}
+
+func newHotStore(ctx contractapi.TransactionContextInterface) *recordStore {
+	//获取首次运行时间
+	//将上传数据条数与区块号传入公有数据，存入哈希值
+	//将时间片，节点编号，哈希，串写入私有数据
+	//创建一个数据缓冲区间，时序数据，自动时间归档，存入
+	//在每次交易执行完之后进行判断
+	store := new(recordStore)
 	store.Ctx = ctx
 	return store
 }

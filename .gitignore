@@ -11,3 +11,4 @@ playbooks/ops/certgen/v3.ext
 *.lock
 1
 /venv/
+temp
