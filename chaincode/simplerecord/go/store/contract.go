@@ -1,7 +1,6 @@
 package store
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/golang/protobuf/ptypes/timestamp"
@@ -17,28 +16,37 @@ func (c *Contract) Instantiate() {
 	fmt.Println("Instantiated")
 }
 
-func (c *Contract) AddRecord(ctx TransactionContextInterface) error {
-	err := ctx.GetHotStore().AddRecord()
-	if err != nil {
-		return err
-	}
-	// TODO
-	// 读取缓存目录，检查区块数量， 时机为blockNums%maxRetentionBlock+1==0, 获取当前私有数据哈希
-	// 在条件达到时，对所有私有条目进行获取，记录开始-结束的主键
-	// 这里需要确保主键的字典序
-	return nil
+func (c *Contract) AddPubRecord(ctx TransactionContextInterface, timestamp, deviceId string, temperature float64) error {
+	return ctx.GetHotStore().AddPubRecord(&Record{
+		Timestamp:   timestamp,
+		DeviceID:    deviceId,
+		Temperature: temperature,
+	})
+
 }
 
-func (c *Contract) GetRecord(ctx TransactionContextInterface, timestamp, deviceId string) ([]byte, error) {
+func (c *Contract) AddPvtRecord(ctx TransactionContextInterface) error {
+	return ctx.GetHotStore().AddPvtRecord()
+}
+
+func (c *Contract) GetPubRecord(ctx TransactionContextInterface, timestamp, deviceId string) (*Record, error){
 	record := &Record{
-		Timestamp: timestamp,
-		DeviceID:  deviceId,
+		Timestamp:   timestamp,
+		DeviceID:    deviceId,
+		Temperature: 0,
 	}
-	err := ctx.GetHotStore().GetRecord(record)
-	if err != nil {
-		return nil, err
+	err := ctx.GetHotStore().GetPubRecord(record)
+	return record, err
+}
+
+func (c *Contract) GetPvtRecord(ctx TransactionContextInterface, timestamp, deviceId string) (*Record, error) {
+	record := &Record{
+		Timestamp:   timestamp,
+		DeviceID:    deviceId,
+		Temperature: 0,
 	}
-	return json.Marshal(record)
+	err := ctx.GetHotStore().GetPvtRecord(record)
+	return record, err
 }
 
 func (c *Contract) AddArchive(ctx TransactionContextInterface) error {

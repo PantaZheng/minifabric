@@ -10,7 +10,7 @@ import (
 
 const collectionName = "collectionPrivate"
 
-var emptyValue []byte
+//var emptyValue []byte
 
 //type RetentionPolicy struct {
 //	StartTime timestamp.Timestamp `json:"start_time"`
@@ -28,8 +28,10 @@ func (r *Record) makePrimaryKey() string {
 }
 
 type HotStoreInterface interface {
-	AddRecord() error
-	GetRecord(record *Record) error
+	AddPubRecord(record *Record) error
+	AddPvtRecord() error
+	GetPubRecord(record *Record) error
+	GetPvtRecord(record *Record) error
 	//GetRecordHash(timestamp, id string) (string, error)
 	//GetRecordsByRange(startKey, endKey string) ([]Record, error)
 }
@@ -38,11 +40,40 @@ type hotStore struct {
 	Ctx contractapi.TransactionContextInterface
 }
 
-//func (hs *hotStore) archive() error {
-//	files, _ := ioutil.ReadDir("./")
-//}
+func (hs *hotStore) AddPubRecord(record *Record) error {
+	primaryKey := record.makePrimaryKey()
+	//// 检查重复
+	//recordAsBytes, err := hs.Ctx.GetStub().GetState(primaryKey)
+	//if err != nil {
+	//	return fmt.Errorf("Failed to get record: " + err.Error())
+	//} else if recordAsBytes != nil {
+	//	fmt.Println("This record already exists: " + primaryKey)
+	//	return fmt.Errorf("This record already exists: " + primaryKey)
+	//}
 
-func (hs *hotStore) AddRecord() error {
+	hotRecordJSON, err := json.Marshal(record)
+	if err != nil {
+		return fmt.Errorf(err.Error())
+	}
+
+	// 保存热点记录到状态库
+	err = hs.Ctx.GetStub().PutState(primaryKey, hotRecordJSON)
+	if err != nil {
+		return fmt.Errorf("failed to put hot record: %s", err.Error())
+	}
+
+	// 时序索引
+	/*indexName := "timestamp~id"
+	timeIndex, err := hs.Ctx.GetStub().CreateCompositeKey(indexName, []string{record.Timestamp, record.DeviceID})
+	if err != nil {
+		return err
+	}
+	err = hs.Ctx.GetStub().PutState(timeIndex, emptyValue)*/
+
+	return err
+}
+
+func (hs *hotStore) AddPvtRecord() error {
 	transMap, err := hs.Ctx.GetStub().GetTransient()
 	if err != nil {
 		return fmt.Errorf("Error getting transient: " + err.Error())
@@ -59,31 +90,23 @@ func (hs *hotStore) AddRecord() error {
 		return fmt.Errorf("failed to unmarshal JSON: %s", err.Error())
 	}
 
-	if len(recordInput.DeviceID) == 0 {
-		return fmt.Errorf("id field must be a non-empty string")
-	}
-
-	if recordInput.Temperature < 0 || recordInput.Temperature > 100 {
-		return fmt.Errorf("temperature field must between 0 ~ 100")
-	}
-
-	primaryKey := recordInput.makePrimaryKey()
-	// 检查重复
-	recordAsBytes, err := hs.Ctx.GetStub().GetPrivateData(collectionName, primaryKey)
-	if err != nil {
-		return fmt.Errorf("Failed to get recordInput: " + err.Error())
-	} else if recordAsBytes != nil {
-		fmt.Println("This recordInput already exists: " + primaryKey)
-		return fmt.Errorf("This recordInput already exists: " + primaryKey)
-	}
-
-	hotRecord := &Record{
-		DeviceID:    recordInput.DeviceID,
+	record := &Record{
 		Timestamp:   recordInput.Timestamp,
+		DeviceID:    recordInput.DeviceID,
 		Temperature: recordInput.Temperature,
 	}
 
-	hotRecordJSON, err := json.Marshal(hotRecord)
+	primaryKey := record.makePrimaryKey()
+	//// 检查重复
+	//recordAsBytes, err := hs.Ctx.GetStub().GetPrivateData(collectionName, primaryKey)
+	//if err != nil {
+	//	return fmt.Errorf("Failed to get record: " + err.Error())
+	//} else if recordAsBytes != nil {
+	//	fmt.Println("This record already exists: " + primaryKey)
+	//	return fmt.Errorf("This record already exists: " + primaryKey)
+	//}
+
+	hotRecordJSON, err := json.Marshal(record)
 	if err != nil {
 		return fmt.Errorf(err.Error())
 	}
@@ -95,19 +118,30 @@ func (hs *hotStore) AddRecord() error {
 	}
 
 	// 时序索引
-	indexName := "timestamp~id"
-	timeIndex, err := hs.Ctx.GetStub().CreateCompositeKey(indexName, []string{recordInput.Timestamp, recordInput.DeviceID})
-	if err != nil {
-		return err
-	}
-	err = hs.Ctx.GetStub().PutPrivateData(collectionName, timeIndex, emptyValue)
-
-	fmt.Println("recordInput:", recordInput)
+	//indexName := "timestamp~id"
+	//timeIndex, err := hs.Ctx.GetStub().CreateCompositeKey(indexName, []string{record.Timestamp, record.DeviceID})
+	//if err != nil {
+	//	return err
+	//}
+	//err = hs.Ctx.GetStub().PutPrivateData(collectionName, timeIndex, emptyValue)
 
 	return err
 }
 
-func (hs *hotStore) GetRecord(record *Record) error {
+func (hs *hotStore) GetPubRecord(record *Record) error {
+	primaryKey := record.makePrimaryKey()
+	recordAsBytes, err := hs.Ctx.GetStub().GetState(primaryKey)
+	if err != nil {
+		return fmt.Errorf("failed to read from marble %s", err.Error())
+	}
+	if recordAsBytes == nil {
+		return fmt.Errorf("%s does not exist", primaryKey)
+	}
+	err = json.Unmarshal(recordAsBytes, record)
+	return err
+}
+
+func (hs *hotStore) GetPvtRecord(record *Record) error {
 	primaryKey := record.makePrimaryKey()
 	recordAsBytes, err := hs.Ctx.GetStub().GetPrivateData(collectionName, primaryKey)
 	if err != nil {
@@ -116,7 +150,6 @@ func (hs *hotStore) GetRecord(record *Record) error {
 	if recordAsBytes == nil {
 		return fmt.Errorf("%s does not exist", primaryKey)
 	}
-
 	err = json.Unmarshal(recordAsBytes, record)
 	return err
 }

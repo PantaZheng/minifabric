@@ -1,4 +1,4 @@
-module record
+module recordcc
 
 go 1.16
 

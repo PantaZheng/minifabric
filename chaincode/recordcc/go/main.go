@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"record/store"
+	"recordcc/store"
 
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"math/rand"
 	"os"
@@ -16,10 +15,12 @@ import (
 )
 
 const (
-	ccID      = "recordcc"
-	channelID = "mychannel"
-	orgName   = "org1.example.com"
-	orgAdmin  = "Admin"
+	ccID          = "simplerecord"
+	channelID     = "mychannel"
+	orgName       = "org1.example.com"
+	orgAdmin      = "Admin"
+	publicTxName  = "AddPublicRecord"
+	privateTxName = "AddPrivateRecord"
 )
 
 /*
@@ -35,24 +36,33 @@ type Record struct {
 	Temperature float64 `json:"temperature"`
 }
 
-func addRecord(contract *gateway.Contract, record *Record) error {
-	recordJSON, err := json.Marshal(record)
-	if err != nil {
-		return err
+func addRecord(contract *gateway.Contract, txName string) {
+	var seededRand = rand.New(rand.NewSource(time.Now().Unix()))
+	var wg sync.WaitGroup
+	startTime := time.Now()
+	for i := 0; i < 2000; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if _, err := contract.SubmitTransaction(txName,
+				strconv.FormatInt(time.Now().UnixNano(), 10),
+				strconv.FormatInt(int64(seededRand.Intn(20)), 10),
+				strconv.FormatFloat(seededRand.Float64(), 'g', 4, 64)); err != nil {
+				logger.Printf(" %v addRecord error: %v \n", txName, err.Error())
+			}
+		}()
 	}
-	logger.Println("add Record %v", record)
-	transient := make(map[string][]byte)
-	transient["record"] = recordJSON
-	tx, err := contract.CreateTransaction("AddRecord", gateway.WithTransient(transient))
-	if err != nil {
-		return fmt.Errorf("failed to create transaction: %v", err.Error())
-	}
-	_, err = tx.Submit()
-	if err != nil {
-		return fmt.Errorf("failed to submit transaction: %v", err.Error())
-	}
-	return nil
+	wg.Wait()
+	logger.Infof("%v  took is %v \n", txName, time.Now().Sub(startTime))
 }
+
+//func addPublicRecord(contract *gateway.Contract, record *Record) error {
+//	_, err := contract.SubmitTransaction("AddPublicRecord", record.Timestamp, record.DeviceID, strconv.FormatFloat(record.Temperature, 'g', 4, 64))
+//	if err != nil {
+//		return fmt.Errorf("failed to submit transaction: %v", err.Error())
+//	}
+//	return nil
+//}
 
 func useWalletGateway() {
 	wallet, err := gateway.NewFileSystemWallet("./profiles/wallets")
@@ -84,31 +94,12 @@ func useWalletGateway() {
 
 	nowTime := time.Now().UnixNano()
 	logger.Info("time is %v", nowTime)
-	var seededRand = rand.New(rand.NewSource(nowTime))
 
 	contract := network.GetContract(ccID)
 	uuid.SetRand(nil)
 
-	var wg sync.WaitGroup
-	start := time.Now()
-	recordTime := start.Unix()
-	for i := 0; i < 2000; i++ {
-		wg.Add(1)
-		record := &Record{
-			Timestamp:   strconv.FormatInt(recordTime, 10),
-			DeviceID:    strconv.FormatInt(int64(seededRand.Intn(20)), 10),
-			Temperature: seededRand.Float64(),
-		}
-		go func() {
-			defer wg.Done()
-			if err := addRecord(contract, record); err != nil {
-				logger.Println("addRecord error", err.Error())
-			}
-		}()
-		recordTime++
-	}
-	wg.Wait()
-	logger.Info("The time took is ", time.Now().Sub(start))
+	addRecord(contract, publicTxName)
+	addRecord(contract, privateTxName)
 }
 
 func main() {
