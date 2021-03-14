@@ -25,6 +25,38 @@
     - "{{ {'name': 'endpoints.j2', 'target': 'endpoints.yaml'} }}"
     - "{{ {'name': 'anchorpeers.j2', 'target': 'anchorpeers.json'} }}"
     - "{{ {'name': 'vscodenodefile.j2', 'target': 'vscode/vscodenodefile.json'} }}"
+    - "{{ {'name': 'tapeconfig.yaml.j2', 'target': 'tapeconfig.yaml'} }}"
+
+- name: Create Caliper Profiles
+  template:
+    src: "{{ pjroot }}/playbooks/ops/profilegen/templates/caliper/{{ item }}.j2"
+    dest: "{{ pjroot }}/vars/caliper/workspace/{{ item }}"
+  with_items:
+    - 'caliper.yaml'
+    - 'benchmarkconfig.yaml'
+    - 'networkconfig.yaml'
+
+- name: Create Caliper Connection profiles
+  include_tasks: "calipergen.yaml"
+  loop: "{{ peerorgs }}"
+  loop_control:
+    loop_var: org
+
+- name: Make sure Prometheus profiles holding directory exists
+  file:
+    path: "{{ pjroot }}/vars/prometheus"
+    state: "{{ item }}"
+    mode: 0775
+  with_items:
+    - "absent"
+    - "directory"
+
+- name: Create Prometheus Profiles
+  template:
+    src: "{{ pjroot }}/playbooks/ops/profilegen/templates/prometheus/{{ item }}.j2"
+    dest: "{{ pjroot }}/vars/prometheus/{{ item }}"
+  with_items:
+    - 'prometheus.yaml'
 
 - name: Get all users
   set_fact:

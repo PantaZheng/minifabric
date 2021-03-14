@@ -9,8 +9,8 @@
 
 declare -A OPNAMES
 LINE0='imageget,certgen,netup,netstats,channelcreate,channeljoin,anchorupdate,'
-#LINE1='profilegen,ccinstall,ccapprove,cccommit,ccinstantiate,discover,explorerup'
-LINE1='profilegen,ccinstall,ccapprove,cccommit,ccinstantiate,discover'
+LINE1='profilegen,ccinstall,ccapprove,cccommit,ccinstantiate,discover,explorerup,monitor'
+# LINE1='profilegen,ccinstall,ccapprove,cccommit,ccinstantiate,discover,'
 OPNAMES=([up]="$LINE0$LINE1" [netup]='imageget,certgen,netup,netstats'
   [restart]='netdown,netup' [generate]='certrem,certgen' [configmerge]='configmerge'
   [orgjoin]='channelquery,configmerge,channelsign,channelupdate'
@@ -19,9 +19,9 @@ OPNAMES=([up]="$LINE0$LINE1" [netup]='imageget,certgen,netup,netstats'
   [instantiate]='ccinstantiate' [initialize]='ccinstantiate'
   [commit]='cccommit' [invoke]='ccinvoke' [create]='channelcreate'
   [query]='ccquery' [join]='channeljoin' [blockquery]='blockquery'
-  [channelquery]='channelquery' [profilegen]='profilegen' [caliperrun]='caliperrun'
+  [channelquery]='channelquery' [profilegen]='profilegen' [caliper]='caliper'
   [channelsign]='channelsign' [channelupdate]='channelupdate'
-  [portainerup]='portainerup' [portainerdown]='portainerdown'
+  [portainerup]='portainerup' [portainerdown]='portainerdown' [monitor]='monitor'
   [anchorupdate]='anchorupdate' [explorerup]='explorerup' [explorerdown]='explorerdown'
   [nodeimport]='nodeimport' [discover]='discover' [imageget]='imageget' [update]='update')
 

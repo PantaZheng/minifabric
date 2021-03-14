@@ -40,4 +40,6 @@ docker run --rm --name minifab                    \
     -e "ADDRS=${ADDRS}"                           \
     -v "$(pwd)/playbooks:/home/playbooks"         \
     -v /etc/localtime:/etc/localtime              \
+    -v "$(pwd)/main.sh:/home/main.sh"             \
+    -v "$(pwd)/scripts:/home/scripts"             \
     registry.cn-qingdao.aliyuncs.com/pantazheng/minifab:latest /home/main.sh "$@"

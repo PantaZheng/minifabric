@@ -1,14 +1,15 @@
 # Byte-compiled / optimized / DLL files
+# file
 *.retry
-.vscode
-.history
-.idea
-vars/
-vendor/
-node_modules/
+*.log
 *.tar.gz
 playbooks/ops/certgen/v3.ext
 *.lock
-1
-/venv/
+# dir
+.vscode
+.history
+.idea
 temp
+vars
+vendor
+node_modules

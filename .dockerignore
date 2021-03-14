@@ -4,3 +4,4 @@ vars
 .*
 Dockerfile*
 node_modules
+.hisyory

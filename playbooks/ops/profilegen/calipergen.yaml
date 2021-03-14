@@ -1,0 +1,4 @@
+- name: Create Caliper Org Connection Profiles
+  template:
+    src: "{{ pjroot }}/playbooks/ops/profilegen/templates/caliper/connectionprofile.yaml.j2"
+    dest: "{{ pjroot }}/vars/caliper/workspace/{{ org }}-connectionprofile.yaml"

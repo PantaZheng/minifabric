@@ -30,9 +30,10 @@ OPNAMES:
   portainerup: "start portainer"
   portainerdown: "stop portainer"
   apprun: "run chaincode application"
-  caliperrun: "run caliper test"
+  caliper: "run caliper test"
   update: "update Minifabric"
   configmerge: "merge configuration"
+  monitor: "prometheus"
 PRECONDITIONS:
   ccinstall: ['PEER']
   ccapprove: ['PEER', 'ORDERER']
@@ -68,7 +69,12 @@ PRECONDITIONS:
   caliperrun: ['PEER', 'ORDERER']
   update: []
   configmerge: []
+  caliper: ['PEER', 'ORDERER']
+  monitor: []
 LANGUAGEENVS:
   java: 'java:latest'
-  go: 'golang:latest'
+  go: 'golang:1.16'
   node: 'node:12.20.0-alpine3.12'
+CALIPER_FABRIC_SDK_RELEASE: 2.1.0
+CALIPER_RELEASE: 0.4.2
+TIMEZONE: /etc/localtime:/etc/localtime

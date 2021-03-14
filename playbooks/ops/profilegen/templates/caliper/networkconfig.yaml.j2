@@ -1,0 +1,26 @@
+name: test-{{ NETNAME }}-with-ccp
+version: 2.0.0
+caliper:
+  blockchain: fabric
+  sutOptions:
+    mutualTls: false
+channels:
+- channelName: {{ CHANNEL_NAME }}
+  contracts:
+  - id: {{ CC_NAME }}
+organizations:
+{% for org in peerorgs %}
+- mspid: {{ org.split('.')|join('-') }}
+  connectionProfile:
+    path: /hyperledger/caliper/workspace/{{ org }}-connectionprofile.yaml
+    discover: true
+  identities:
+    certificates:
+    - name: 'Admin'
+      clientPrivateKey:
+        pem: |
+{{ lookup('file', pjroot+'/vars/keyfiles/peerOrganizations/'+org+'/users/Admin@'+org+'/msp/keystore/priv_sk')|indent(10, True) }}
+      clientSignedCert:
+        pem: |
+{{ lookup('file',pjroot+'/vars/keyfiles/peerOrganizations/'+org+'/users/Admin@'+org+'/msp/signcerts/Admin@'+org+'-cert.pem')|indent(10, True) }}
+{% endfor %}

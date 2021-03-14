@@ -1,0 +1,42 @@
+---
+name: {{ org }}-connection-profile
+version: 1.0.0
+client:
+  organization: {{ org }}
+  connection:
+    timeout:
+      peer:
+        endorser: 300
+organizations:
+  {{ org }}:
+    mspid: {{ org.split('.')|join('-') }}
+    peers:
+{%   for peer in allpeers|selectattr('org', 'equalto', org)|list %}
+    - {{ peer.fullname }}
+{%   endfor %}
+    certificateAuthorities:
+{%   for ca in allcas|selectattr('org', 'equalto', org)|list %}
+    - {{ ca.fullname }}
+{%   endfor %}
+peers:
+{% for peer in allpeers|selectattr('org', 'equalto', org)|list %}
+  {{ peer.fullname }}:
+    url: grpcs://{{ peer.url }}:{{ peer.port }}
+    tlsCACerts:
+      pem: |
+{{ lookup('file', pjroot+'/vars/keyfiles/peerOrganizations/'+peer.org+'/peers/'+peer.fullname+'/tls/ca.crt')|indent(8, True) }}
+    grpcOptions:
+      ssl-target-name-override: {{ peer.fullname }}
+      hostnameOverride: {{ peer.fullname }}
+{% endfor %}
+certificateAuthorities:
+{% for ca in allcas|selectattr('org', 'equalto', org)|list %}
+ {{ ca.fullname }}:
+    url: https://{{ ca.url }}:{{ ca.port }}
+    caName: {{ ca.name }}
+    tlsCACerts:
+      pem: |
+{{ lookup('file', pjroot+'/vars/keyfiles/'+orgattrs[ca.org].certpath+'/'+ca.org+'/ca/'+ca.fullname+'-cert.pem')|indent(8, True) }}
+    httpOptions:
+      verify: false
+{% endfor %}

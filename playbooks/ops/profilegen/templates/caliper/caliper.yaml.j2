@@ -1,14 +1,6 @@
 caliper:
-    auth:
-        prometheuspush:
-            username:
-            password:
-        # Prometheus Server
-        prometheus:
-            username:
-            password:
     bind:
-        sut: fabric:{{ sdk_release }}
+        sut: fabric:{{ CALIPER_FABRIC_SDK_RELEASE }}
     workspace: /hyperledger/caliper/workspace
     benchconfig: benchmarkconfig.yaml
     networkconfig: networkconfig.yaml

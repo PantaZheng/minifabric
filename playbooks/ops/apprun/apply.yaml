@@ -28,7 +28,7 @@
 
 - name: Run the chaincode application
   command: >-
-    docker run --network {{ NETNAME }} --name apprun --hostname apprun
+    docker run --network {{ NETNAME }} --name apprun --hostname apprun --rm
     -v /var/run/docker.sock:/var/run/docker.sock
     -v {{ hostroot }}/vars/app/{{ CC_NAME }}/{{ APP_LANGUAGE }}:{{ APP_DIR }}
     -v {{ hostroot }}/vars/run/apprun.sh:/vars/run/apprun.sh

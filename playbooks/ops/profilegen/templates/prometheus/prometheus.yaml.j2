@@ -1,0 +1,49 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+    - targets:
+      - monitor.prometheus:9090
+      labels:
+        instance: prometheus
+  - job_name: pushGateway
+    honor_labels: true
+    static_configs:
+    - targets:
+      - monitor.pushgateway:9091
+      labels:
+        instance: pushgateway
+  - job_name: cadvisor
+    scrape_interval: 5s
+    static_configs:
+    - targets:
+      - monitor.cadvisor:8080
+      labels:
+        instance: cadvisor
+  - job_name: caliper
+    scrape_interval: 5s
+    static_configs:
+    - targets:
+      - calipertest:3000
+      labels:
+        instance: caliper
+  - job_name: peers
+    scrape_interval: 5s
+    static_configs:
+{% for peer in allpeers %}
+    - targets:
+      - {{ peer.url }}:7061
+      labels:
+          instance: {{ peer.fullname }}
+{% endfor %}
+  - job_name: orderers
+    scrape_interval: 5s
+    static_configs:
+{% for orderer in allorderers %}
+    - targets:
+      - {{ orderer.url }}:7060
+      labels:
+        instance: {{ orderer.fullname }}
+{% endfor %}

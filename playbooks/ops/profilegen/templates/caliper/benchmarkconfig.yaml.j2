@@ -1,0 +1,28 @@
+---
+test:
+  name: {{ CC_NAME }}-benchmark
+  description: test benchmark
+  workers:
+    type: local
+    number: 10
+  rounds:
+{% set labels = ['addPublicRecord'] %}
+{% for label in labels %}
+  - label: {{ CC_NAME }} {{ label }} test
+    txDuration: 20
+    rateControl:
+      type: maximum-rate
+      opts:
+        tps: 100
+        step: 5
+        sampleInterval: 20
+        includeFailed: true
+    workload:
+        module: ./{{ CC_NAME }}/{{ label }}.js
+{% endfor %}
+monitors:
+  transaction:
+  - module: prometheus-push
+    options:
+      pushInterval: 5
+      pushUrl: http://monitor.pushgateway:9091

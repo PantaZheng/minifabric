@@ -1,0 +1,47 @@
+---
+- name: Change var caliper file permission
+  command: >-
+    chown -R 1000:1000 {{ pjroot }}/vars/caliper
+
+- name: Check bond caliper image
+  command: >-
+    docker image ls -q hyperledger/caliper_fabric:{{ CALIPER_FABRIC_SDK_RELEASE }}
+  register: imagestatus
+
+- name: Produce image if caliper bond image does not exist
+  when: imagestatus.stdout_lines|length == 0
+  block:
+  - name: Run a container to bind fabric sdk
+    command: >-
+      docker run --network {{ NETNAME }} --name calipertester --hostname calipertester
+      -e TZ="Asia/Shanghai"
+      hyperledger/caliper:{{ CALIPER_RELEASE }} bind --caliper-bind-sut fabric:2.1.0
+
+  - name: Save the container as an image
+    command: >-
+      docker commit calipertester hyperledger/caliper_fabric:{{ CALIPER_FABRIC_SDK_RELEASE }}
+
+  - name: Remove the docker container
+    command: >-
+      docker rm -f calipertester
+
+- name: Launch caliper test
+  command: >-
+    docker run --network {{ NETNAME }} --name calipertester --hostname calipertester
+    -v {{ hostroot }}/vars/caliper/workspace:/hyperledger/caliper/workspace
+    -v {{ hostroot }}/vars/caliper/run:/run
+    -v {{ TIMEZONE }}
+    hyperledger/caliper_fabric:{{ CALIPER_FABRIC_SDK_RELEASE }} launch manager
+  register: runresults
+
+- name: Caliper test run
+  when: runresults.rc != 0
+  debug:
+    msg: "{{ runresults.stderr_lines }}"
+  tags: [print_action]
+
+- name: Caliper test run
+  when: runresults.rc == 0
+  debug:
+    msg: "View results in vars/report.html"
+  tags: [print_action]

@@ -1,0 +1,46 @@
+- name: Docker Run Cadvisor
+  command: >-
+    docker run -d
+    --network {{ NETNAME }}
+    --name monitor.cadvisor
+    --hostname monitor.cadvisor
+    -v {{ TIMEZONE }}
+    -v /:/rootfs:ro
+    -v /var/run:/var/run:rw
+    -v /sys:/sys:ro
+    -v /var/lib/docker/:/var/lib/docker:ro
+    -v /dev/disk/:/dev/disk:ro
+    --privileged=true
+    google/cadvisor:latest
+
+- name: Docker Run Prometheus
+  command: >-
+    docker run -d
+    --network {{ NETNAME }}
+    --name monitor.prometheus
+    --hostname monitor.prometheus
+    -p 9090:9090
+    -v {{ TIMEZONE }}
+    -v {{hostroot}}/vars/prometheus/prometheus.yaml:/etc/prometheus/prometheus.yml
+    prom/prometheus:latest
+
+- name: Docker Run Prometheus Gateway
+  command: >-
+    docker run -d
+    --network {{ NETNAME }}
+    --name monitor.pushgateway
+    --hostname monitor.pushgateway
+    -p 9091:9091
+    -v {{ TIMEZONE }}
+    prom/pushgateway:latest
+
+- name: Docker Run Grafana
+  command: >-
+    docker run -d
+    --network {{ NETNAME }}
+    --name monitor.grafana
+    --hostname monitor.grafana
+    -p 3000:3000
+    -v {{ TIMEZONE }}
+    -v {{hostroot}}/vars/grafana:/etc/grafana
+    grafana/grafana:latest

@@ -4,14 +4,14 @@
 {% for peer in allpeers %}
 {{ peer.fullname }}: &{{ peer.fullname }}
   addr: {{ peer.url }}:{{ peer.port }}
-  tls_ca_cert: {{ pjroot }}/vars/keyfiles/peerOrganizations/{{ peer.org }}/peers/{{ peer.fullname }}/tls/ca.crt
+  tls_ca_cert: keyfiles/peerOrganizations/{{ peer.org }}/peers/{{ peer.fullname }}/tls/ca.crt
 {% endfor %}
 
 orderers:
 {% for orderer in allorderers %}
 {{ orderer.fullname }}: &{{ orderer.fullname }}
   addr: {{ orderer.url }}:{{ orderer.port }}
-  tls_ca_cert: {{ pjroot }}/vars/keyfiles/ordererOrganizations/{{ orderer.org }}/orderers/{{ orderer.fullname }}/tls/ca.crt
+  tls_ca_cert: keyfiles/ordererOrganizations/{{ orderer.org }}/orderers/{{ orderer.fullname }}/tls/ca.crt
 {% endfor %}
 
 # Nodes to interact with
@@ -35,8 +35,9 @@ channel: {{ CHANNEL_NAME }}
 chaincode: {{ CC_NAME }}
 args:
   - GetAllAssets
+  - '{"Point": "{"temperature": 0.1}"'
 mspid: {{ org.split('.')|join('-') }}
 private_key: {{ lookup('file', pjroot+'/vars/keyfiles/peerOrganizations/'+org+'/users/Admin@'+org+'/msp/keystore/priv_sk')|regex_replace('(\n)', '\\\\n') }}
-sign_cert: {{ lookup('file',pjroot+'/vars/keyfiles/peerOrganizations/'+org+'/users/Admin@'+org+'/msp/signcerts/Admin@'+org+'cert.pem')|regex_replace('(\n)', '\\\\n') }}
+sign_cert: {{ lookup('file',pjroot+'/vars/keyfiles/peerOrganizations/'+org+'/users/Admin@'+org+'/msp/signcerts/Admin@'+org+'-cert.pem')|regex_replace('(\n)', '\\\\n') }}
 num_of_conn: 40
 client_per_conn: 40

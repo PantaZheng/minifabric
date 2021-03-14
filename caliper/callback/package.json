@@ -1,0 +1,8 @@
+{
+  "name": "callback",
+  "version": "1.0.0",
+  "dependencies": {},
+  "devDependencies": {
+    "@hyperledger/caliper-core": "^0.4.2"
+  }
+}
