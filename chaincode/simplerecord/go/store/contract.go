@@ -2,11 +2,14 @@ package store
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/golang/protobuf/ptypes/timestamp"
 
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
+
+var data = []byte(strings.Repeat("1", 10240))
 
 type Contract struct {
 	contractapi.Contract
@@ -16,24 +19,28 @@ func (c *Contract) Instantiate() {
 	fmt.Println("Instantiated")
 }
 
-func (c *Contract) AddPubRecord(ctx TransactionContextInterface, timestamp, deviceId string, temperature float64) error {
+func (c *Contract) AddPubRecord(ctx TransactionContextInterface, timestamp, deviceId string) error {
 	return ctx.GetHotStore().AddPubRecord(&Record{
-		Timestamp:   timestamp,
-		DeviceID:    deviceId,
-		Temperature: temperature,
+		Timestamp: timestamp,
+		DeviceID:  deviceId,
+		Data:      data,
 	})
 
 }
 
-func (c *Contract) AddPvtRecord(ctx TransactionContextInterface) error {
-	return ctx.GetHotStore().AddPvtRecord()
+func (c *Contract) AddPvtRecord(ctx TransactionContextInterface, timestamp, deviceId string) error {
+	return ctx.GetHotStore().AddPvtRecord(&Record{
+		Timestamp: timestamp,
+		DeviceID:  deviceId,
+		Data:      data,
+	})
 }
 
-func (c *Contract) GetPubRecord(ctx TransactionContextInterface, timestamp, deviceId string) (*Record, error){
+func (c *Contract) GetPubRecord(ctx TransactionContextInterface, timestamp, deviceId string) (*Record, error) {
 	record := &Record{
-		Timestamp:   timestamp,
-		DeviceID:    deviceId,
-		Temperature: 0,
+		Timestamp: timestamp,
+		DeviceID:  deviceId,
+		Data:      []byte("0"),
 	}
 	err := ctx.GetHotStore().GetPubRecord(record)
 	return record, err
@@ -41,9 +48,9 @@ func (c *Contract) GetPubRecord(ctx TransactionContextInterface, timestamp, devi
 
 func (c *Contract) GetPvtRecord(ctx TransactionContextInterface, timestamp, deviceId string) (*Record, error) {
 	record := &Record{
-		Timestamp:   timestamp,
-		DeviceID:    deviceId,
-		Temperature: 0,
+		Timestamp: timestamp,
+		DeviceID:  deviceId,
+		Data:      []byte("0"),
 	}
 	err := ctx.GetHotStore().GetPvtRecord(record)
 	return record, err

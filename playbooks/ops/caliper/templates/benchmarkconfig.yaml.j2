@@ -1,0 +1,53 @@
+---
+test:
+  name: {{ CC_NAME }}-benchmark
+  description: test benchmark
+  workers:
+    type: local
+    number: 4
+  rounds:
+{% set labels = ['addPubRecord'] %}
+{% for label in labels %}
+  - label: {{ CC_NAME }} {{ label }} test
+    txNumber: 1000
+    rateControl:
+      type: maximum-rate
+      opts:
+        tps: 20
+        step: 5
+        sampleInterval: 20
+        includeFailed: true
+    workload:
+      module: ./{{ CC_NAME }}/{{ label }}.js
+      arguments:
+        contractId: {{ CC_NAME }}
+{% endfor %}
+{# monitors:
+  resource:
+  - module: prometheus
+    options:
+      interval: 5
+      url: http://monitor.prometheus:9090
+      metrics:
+        include: [dev.*, peer, orderer]
+        queries:
+        - name: Endorse Time (s)
+          query: rate(endorser_proposal_duration_sum{chaincode="{{ CC_NAME }}"}[1m])/rate(endorser_proposal_duration_count{chaincode="{{ CC_NAME }}"}[1m])
+          step: 1
+          label: instance
+          statistic: avg
+        - name: Max Memory (MB)
+          query: sum(container_memory_rss{name=~".+"}*0.000001) by (name)
+          step: 10
+          label: name
+          statistic: max
+        - name: Max file Usage(MB)
+          query: sum(container_fs_usage_bytes{name=~".+"}*0.000001) by (name)
+          step: 10
+          label: name
+          statistic: max
+    charting:
+      polar:
+        metrics: [Max Memory (MB),Endorse Time (s),Max file Usage(MB)]
+      bar:
+        metrics: [all] #}

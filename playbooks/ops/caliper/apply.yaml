@@ -25,6 +25,21 @@
     command: >-
       docker rm -f calipertester
 
+- name: Create Caliper Profiles
+  template:
+    src: "{{ pjroot }}/playbooks/ops/caliper/templates/{{ item }}.j2"
+    dest: "{{ pjroot }}/vars/caliper/workspace/{{ item }}"
+  with_items:
+    - 'caliper.yaml'
+    - 'benchmarkconfig.yaml'
+    - 'networkconfig.yaml'
+
+- name: Create Caliper Connection profiles
+  include_tasks: "calipergen.yaml"
+  loop: "{{ peerorgs }}"
+  loop_control:
+    loop_var: org
+
 - name: Launch caliper test
   command: >-
     docker run --network {{ NETNAME }} --name calipertester --hostname calipertester

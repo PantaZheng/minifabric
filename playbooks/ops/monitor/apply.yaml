@@ -1,3 +1,19 @@
+- name: Make sure Prometheus profiles holding directory exists
+  file:
+    path: "{{ pjroot }}/vars/prometheus"
+    state: "{{ item }}"
+    mode: 0775
+  with_items:
+    - "absent"
+    - "directory"
+
+- name: Create Prometheus Profiles
+  template:
+    src: "{{ pjroot }}/playbooks/ops/monitor/templates/{{ item }}.j2"
+    dest: "{{ pjroot }}/vars/prometheus/{{ item }}"
+  with_items:
+    - 'prometheus.yaml'
+
 - name: Docker Run Cadvisor
   command: >-
     docker run -d
@@ -6,12 +22,23 @@
     --hostname monitor.cadvisor
     -v {{ TIMEZONE }}
     -v /:/rootfs:ro
-    -v /var/run:/var/run:rw
+    -v /var/run:/var/run:ro
     -v /sys:/sys:ro
     -v /var/lib/docker/:/var/lib/docker:ro
     -v /dev/disk/:/dev/disk:ro
-    --privileged=true
-    google/cadvisor:latest
+    -p 8080:8080
+    --privileged
+    google/cadvisor:canary
+
+- name: Docker Run node exporter
+  command: >-
+    docker run -d
+    --network {{ NETNAME }}
+    --name monitor.nodeexporter
+    --hostname monitor.nodeexporter
+    -v {{ TIMEZONE }}
+    -p 9100:9100
+    prom/node-exporter:latest
 
 - name: Docker Run Prometheus
   command: >-

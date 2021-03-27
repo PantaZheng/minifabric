@@ -15,6 +15,13 @@ type Archive struct {
 	Hash          string              `json:"hash"`
 }
 
+type TimeSeriesRecord struct {
+	StartTime timestamp.Timestamp `json:"start_time"`
+	EndTime   timestamp.Timestamp `json:"end_time"`
+	DeviceID  string              `json:"device_id"`
+	Data      []byte              `json:"data"`
+}
+
 type ColdStoreInterface interface {
 	AddArchive(archive *Archive) error
 	GetArchive(archive *Archive) error
@@ -56,7 +63,7 @@ func (cs *coldStore) GetArchive(archive *Archive) error {
 }
 
 func (cs *coldStore) UpdateConfig() {
-	
+
 }
 
 func newColdStore(ctx contractapi.TransactionContextInterface) *coldStore {

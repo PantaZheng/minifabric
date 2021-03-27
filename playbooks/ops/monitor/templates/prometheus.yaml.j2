@@ -22,13 +22,13 @@ scrape_configs:
       - monitor.cadvisor:8080
       labels:
         instance: cadvisor
-  - job_name: caliper
+  - job_name: node-exporter
     scrape_interval: 5s
     static_configs:
     - targets:
-      - calipertest:3000
+      - monitor.nodeexporter:9100
       labels:
-        instance: caliper
+        instance: node-exporter
   - job_name: peers
     scrape_interval: 5s
     static_configs:

@@ -8,7 +8,7 @@ test:
       - label: {{ CC_NAME }} test
         description: {{ CC_NAME }} benchmark
         txDuration: 60
-        rateControl: 
+        rateControl:
           type: fixed-load
           opts:
             transactionLoad: 300
@@ -18,3 +18,7 @@ test:
             contractId: {{ CC_NAME }}
             randomSeed: 5000000
             userID: Admin@{{ CURRENT_ORG }}
+
+{# sum(container_memory_rss{name=~"peer.+"}*0.000001) by (name) #}
+{# sum(container_memory_rss{name=~"orderer.+"}*0.000001) by (name) #}
+{# sum(container_memory_rss{name=~"dev.+"}*0.000001) by (name) #}

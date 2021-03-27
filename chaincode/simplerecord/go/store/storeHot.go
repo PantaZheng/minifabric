@@ -18,9 +18,9 @@ const collectionName = "collectionPrivate"
 //}
 
 type Record struct {
-	Timestamp   string  `json:"timestamp"`
-	DeviceID    string  `json:"device_id"`
-	Temperature float64 `json:"temperature"`
+	Timestamp string `json:"timestamp"`
+	DeviceID  string `json:"device_id"`
+	Data      []byte `json:"data"`
 }
 
 func (r *Record) makePrimaryKey() string {
@@ -29,7 +29,7 @@ func (r *Record) makePrimaryKey() string {
 
 type HotStoreInterface interface {
 	AddPubRecord(record *Record) error
-	AddPvtRecord() error
+	AddPvtRecord(record *Record) error
 	GetPubRecord(record *Record) error
 	GetPvtRecord(record *Record) error
 	//GetRecordHash(timestamp, id string) (string, error)
@@ -73,30 +73,31 @@ func (hs *hotStore) AddPubRecord(record *Record) error {
 	return err
 }
 
-func (hs *hotStore) AddPvtRecord() error {
-	transMap, err := hs.Ctx.GetStub().GetTransient()
-	if err != nil {
-		return fmt.Errorf("Error getting transient: " + err.Error())
-	}
-
-	transientRecordJSON, ok := transMap["record"]
-	if !ok {
-		return fmt.Errorf("hot_record not found in the transient map")
-	}
-
-	var recordInput Record
-	err = json.Unmarshal(transientRecordJSON, &recordInput)
-	if err != nil {
-		return fmt.Errorf("failed to unmarshal JSON: %s", err.Error())
-	}
-
-	record := &Record{
-		Timestamp:   recordInput.Timestamp,
-		DeviceID:    recordInput.DeviceID,
-		Temperature: recordInput.Temperature,
-	}
+func (hs *hotStore) AddPvtRecord(record *Record) error {
+	//transMap, err := hs.Ctx.GetStub().GetTransient()
+	//if err != nil {
+	//	return fmt.Errorf("Error getting transient: " + err.Error())
+	//}
+	//
+	//transientRecordJSON, ok := transMap["record"]
+	//if !ok {
+	//	return fmt.Errorf("hot_record not found in the transient map")
+	//}
+	//
+	//var recordInput Record
+	//err = json.Unmarshal(transientRecordJSON, &recordInput)
+	//if err != nil {
+	//	return fmt.Errorf("failed to unmarshal JSON: %s", err.Error())
+	//}
+	//
+	//record := &Record{
+	//	Timestamp:   recordInput.Timestamp,
+	//	DeviceID:    recordInput.DeviceID,
+	//	Temperature: recordInput.Temperature,
+	//}
 
 	primaryKey := record.makePrimaryKey()
+
 	//// 检查重复
 	//recordAsBytes, err := hs.Ctx.GetStub().GetPrivateData(collectionName, primaryKey)
 	//if err != nil {
