@@ -14,36 +14,40 @@
 
 'use strict';
 
-const {WorkloadModuleBase} = require('@hyperledger/caliper-core');
-
+const { WorkloadModuleBase } = require('@hyperledger/caliper-core');
 /**
  * Workload module for initializing the SUT with various marbles.
  */
-class AddPrivateRecordWorkload extends WorkloadModuleBase {
+class AddPublicRecordWorkload extends WorkloadModuleBase {
     constructor() {
         super();
         this.txIndex = -1;
         this.startTime = Date.now()
     }
+    /**
+     * Assemble TXs for creating new marbles.
+     * @return {Promise<TxStatus[]>}
+     */
 
     async initializeWorkloadModule(workerIndex, totalWorkers, roundIndex, roundArguments, sutAdapter, sutContext) {
         await super.initializeWorkloadModule(workerIndex, totalWorkers, roundIndex, roundArguments, sutAdapter, sutContext);
     }
 
-    /**
-     * Assemble TXs for creating new marbles.
-     * @return {Promise<TxStatus[]>}
-     */
     async submitTransaction() {
         this.txIndex++;
+
         let args = {
             contractId: this.roundArguments.contractId,
-            contractFunction: 'addPvtRecord',
+            contractFunction: 'addPubRecordTst',
             contractArguments: [
                 (this.txIndex).toString(),
                 Math.floor(Math.random()*10),
-                " ".repeat(this.roundArguments.amount)
             ],
+            transientMap: {
+                "time": JSON.stringify({
+                    "data": " ".repeat(this.roundArguments.amount)
+                })
+            },
             readOnly: false
         };
 
@@ -59,7 +63,7 @@ class AddPrivateRecordWorkload extends WorkloadModuleBase {
  * @return {WorkloadModuleInterface}
  */
 function createWorkloadModule() {
-    return new AddPrivateRecordWorkload();
+    return new AddPublicRecordWorkload();
 }
 
 module.exports.createWorkloadModule = createWorkloadModule;

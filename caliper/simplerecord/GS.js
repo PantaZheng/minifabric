@@ -38,12 +38,7 @@ class AddPrivateRecordWorkload extends WorkloadModuleBase {
         this.txIndex++;
         let args = {
             contractId: this.roundArguments.contractId,
-            contractFunction: 'addPvtRecord',
-            contractArguments: [
-                (this.txIndex).toString(),
-                Math.floor(Math.random()*10),
-                " ".repeat(this.roundArguments.amount)
-            ],
+            contractFunction: 'GS',
             readOnly: false
         };
 

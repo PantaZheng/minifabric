@@ -45,7 +45,8 @@
     -v /var/run/:/host/var/run
     -v {{ mpath }}/{{item.org}}/peers/{{item.fullname}}/msp:/etc/hyperledger/fabric/msp
     -v {{ mpath }}/{{item.org}}/peers/{{item.fullname}}/tls:/etc/hyperledger/fabric/tls
-    -v {{ item.fullname }}:/var/hyperledger/production
+    -v {{ hostroot }}/vars/store/peers/{{ item.fullname }}/transientstore:/var/hyperledger/production/transientstore
+    -v {{ hostroot }}/vars/store/peers/{{ item.fullname }}/ledgersData:/var/hyperledger/production/ledgersData
     -e TZ="Asia/Shanghai"
     {{ container_options }}
     hyperledger/fabric-peer:{{ fabric.release }} peer node start
@@ -74,7 +75,8 @@
     -v {{ hostroot }}/vars/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
     -v {{ mpath }}/{{item.org}}/orderers/{{item.fullname}}/msp:/var/hyperledger/orderer/msp
     -v {{ mpath }}/{{item.org}}/orderers/{{item.fullname}}/tls:/var/hyperledger/orderer/tls
-    -v {{ item.fullname }}:/var/hyperledger/production/orderer
+    -v {{ hostroot }}/vars/store/orderers/{{ item.fullname }}/chains:/var/hyperledger/production/orderer/chains
+    -v {{ hostroot }}/vars/store/orderers/{{ item.fullname }}/index:/var/hyperledger/production/orderer/index
     -e TZ="Asia/Shanghai"
     {{ container_options }}
     hyperledger/fabric-orderer:{{ fabric.release }}

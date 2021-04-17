@@ -6,22 +6,100 @@ test:
     type: local
     number: 4
   rounds:
+{% set amount = 128 %}
 {% set labels = ['addPubRecord'] %}
 {% for label in labels %}
-  - label: {{ CC_NAME }} {{ label }} test
+  - label: {{ label }} test
     txNumber: 1000
     rateControl:
       type: maximum-rate
       opts:
-        tps: 20
-        step: 5
-        sampleInterval: 20
+        tps: 100
+        step: 10
+        sampleInterval: 5
+        includeFailed: true
+    workload:
+      module: ./{{ CC_NAME }}/{{ label }}.js
+      arguments:
+        contractId: {{ CC_NAME }}
+        amount: {{ amount }}
+{% endfor %}
+{% set amount = 10240 %}
+{% set labels = ['addPubRecordTst','addPvtRecordTst','addPubRecord','addPvtRecord'] %}
+{% for label in labels %}
+  - label: {{ label }} test
+    txNumber: 1000
+    rateControl:
+      type: maximum-rate
+      opts:
+        tps: 100
+        step: 10
+        sampleInterval: 5
+        includeFailed: true
+    workload:
+      module: ./{{ CC_NAME }}/{{ label }}.js
+      arguments:
+        contractId: {{ CC_NAME }}
+        amount: {{ amount }}
+{% endfor %}
+
+
+{# {% set amount = 200 %}
+{% set label = 'PSRQ' %}
+  - label: {{ label }} test {{ amount }}
+    txNumber: 1000
+    rateControl:
+      type: maximum-rate
+      opts:
+        tps: 100
+        step: 10
+        sampleInterval: 5
+        includeFailed: true
+    workload:
+      module: ./{{ CC_NAME }}/{{ label }}.js
+      arguments:
+        contractId: {{ CC_NAME }}
+        amount: {{ amount }} #}
+
+
+{# {% set labels = ['GS','GPD','GPDH'] %}
+{% for label in labels %}
+  - label: {{ label }} test
+    txNumber: 1000
+    rateControl:
+      type: maximum-rate
+      opts:
+        tps: 100
+        step: 10
+        sampleInterval: 5
         includeFailed: true
     workload:
       module: ./{{ CC_NAME }}/{{ label }}.js
       arguments:
         contractId: {{ CC_NAME }}
 {% endfor %}
+
+{% set amounts = [1,5,25,125] %}
+{% set labels = ['HSSQ','PSRQ','HSMQ'] %}
+{% for amount in amounts %}
+{% for label in labels %}
+  - label: {{ label }} test {{ amount }}
+    txNumber: 1000
+    rateControl:
+      type: maximum-rate
+      opts:
+        tps: 100
+        step: 10
+        sampleInterval: 5
+        includeFailed: true
+    workload:
+      module: ./{{ CC_NAME }}/{{ label }}.js
+      arguments:
+        contractId: {{ CC_NAME }}
+        amount: {{ amount }}
+{% endfor %}
+{% endfor %} #}
+
 {# monitors:
   resource:
   - module: prometheus

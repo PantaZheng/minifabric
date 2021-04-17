@@ -38,12 +38,16 @@ class AddPrivateRecordWorkload extends WorkloadModuleBase {
         this.txIndex++;
         let args = {
             contractId: this.roundArguments.contractId,
-            contractFunction: 'addPvtRecord',
+            contractFunction: 'addPubPvtTst',
             contractArguments: [
-                (this.txIndex).toString(),
+                this.txIndex,
                 Math.floor(Math.random()*10),
-                " ".repeat(this.roundArguments.amount)
             ],
+            transientMap: {
+                "time": JSON.stringify({
+                    "data": " ".repeat(this.roundArguments.amount)
+                })
+            },
             readOnly: false
         };
 

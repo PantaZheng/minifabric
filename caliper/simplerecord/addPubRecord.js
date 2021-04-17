@@ -40,8 +40,9 @@ class AddPublicRecordWorkload extends WorkloadModuleBase {
             contractId: this.roundArguments.contractId,
             contractFunction: 'addPubRecord',
             contractArguments: [
-                'Pub'+(this.txIndex).toString(),
-                Math.floor(Math.random()*10)
+                (this.txIndex).toString(),
+                Math.floor(Math.random()*10),
+                " ".repeat(this.roundArguments.amount)
             ],
             readOnly: false
         };
