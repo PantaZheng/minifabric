@@ -18,8 +18,17 @@ fabric:
       FABRIC_LOGGING_SPEC: DEBUG
     peer:
       FABRIC_LOGGING_SPEC: DEBUG
+      CORE_LEDGER_HISTROY_ENABLEHISTORYDATABASE: false
+      CORE_OPERATIONS_LISTENADDRESS: 0.0.0.0:7061
+      CORE_OPERATIONS_TLS_ENABLED: false
+      CORE_METRICS_PROVIDER: prometheus
+      CORE_PEER_PROFILE_ENABLED: true
     orderer:
       FABRIC_LOGGING_SPEC: DEBUG
+      ORDERER_GENERAL_PROFILE_ENABLED: true
+      ORDERER_OPERATIONS_LISTENADDRESS: 0.0.0.0:7060
+      ORDERER_OPERATIONS_TLS_ENABLED: false
+      ORDERER_METRICS_PROVIDER: prometheus
   ### use go proxy when default go proxy is restricted in some of the regions.
   ### the default goproxy
   # goproxy: "https://proxy.golang.org,direct"

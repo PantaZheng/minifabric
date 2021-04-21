@@ -6,7 +6,6 @@ CORE_PEER_TLS_ENABLED=true
 CORE_PEER_GOSSIP_USELEADERELECTION=false
 CORE_PEER_GOSSIP_ORGLEADER=true
 CORE_PEER_GOSSIP_STATE_ENABLED=false
-CORE_PEER_PROFILE_ENABLED=false
 CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
 CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
 CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
@@ -37,6 +36,3 @@ CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=adminpw
 {{ setting.key }}={{ setting.value }}
 {% endfor %}
 {% endif %}
-CORE_OPERATIONS_LISTENADDRESS=0.0.0.0:7061
-CORE_OPERATIONS_TLS_ENABLED=false
-CORE_METRICS_PROVIDER=prometheus
