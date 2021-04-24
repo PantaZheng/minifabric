@@ -40,17 +40,18 @@
 
 - name: Start all peer nodes
   command: >-
-    docker run -d --network {{ NETNAME }} --name {{ item.fullname }} --hostname {{ item.fullname }}
-    --env-file {{ pjroot }}/vars/run/{{ item.fullname }}.env {{ item.portmap }}
+    docker run -d --network {{ NETNAME }} --name {{ item.1.fullname }} --hostname {{ item.1.fullname }}
+    --env-file {{ pjroot }}/vars/run/{{ item.1.fullname }}.env {{ item.1.portmap }}
     -v /var/run/:/host/var/run
-    -v {{ mpath }}/{{item.org}}/peers/{{item.fullname}}/msp:/etc/hyperledger/fabric/msp
-    -v {{ mpath }}/{{item.org}}/peers/{{item.fullname}}/tls:/etc/hyperledger/fabric/tls
-    -v {{ hostroot }}/vars/store/peers/{{ item.fullname }}/transientstore:/var/hyperledger/production/transientstore
-    -v {{ hostroot }}/vars/store/peers/{{ item.fullname }}/ledgersData:/var/hyperledger/production/ledgersData
+    -v {{ mpath }}/{{item.1.org}}/peers/{{item.1.fullname}}/msp:/etc/hyperledger/fabric/msp
+    -v {{ mpath }}/{{item.1.org}}/peers/{{item.1.fullname}}/tls:/etc/hyperledger/fabric/tls
+    -v {{ hostroot }}/vars/store/peers/{{ item.1.fullname }}/transientstore:/var/hyperledger/production/transientstore
+    -v {{ hostroot }}/vars/store/peers/{{ item.1.fullname }}/ledgersData:/var/hyperledger/production/ledgersData
     -e TZ="Asia/Shanghai"
+    -p {{ 6060+ item.0 |int }}:6060
     {{ container_options }}
     hyperledger/fabric-peer:{{ fabric.release }} peer node start
-  with_items: "{{ allpeers }}"
+  with_indexed_items: "{{ allpeers }}"
   register: peerstat
   ignore_errors: yes
 
@@ -70,17 +71,18 @@
 
 - name: Start all orderer nodes
   command: >-
-    docker run -d --network {{ NETNAME }} --name {{ item.fullname }} --hostname {{ item.fullname }}
-    --env-file {{ pjroot }}/vars/run/{{ item.fullname }}.env {{ item.portmap }}
+    docker run -d --network {{ NETNAME }} --name {{ item.1.fullname }} --hostname {{ item.1.fullname }}
+    --env-file {{ pjroot }}/vars/run/{{ item.1.fullname }}.env {{ item.1.portmap }}
     -v {{ hostroot }}/vars/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
-    -v {{ mpath }}/{{item.org}}/orderers/{{item.fullname}}/msp:/var/hyperledger/orderer/msp
-    -v {{ mpath }}/{{item.org}}/orderers/{{item.fullname}}/tls:/var/hyperledger/orderer/tls
-    -v {{ hostroot }}/vars/store/orderers/{{ item.fullname }}/chains:/var/hyperledger/production/orderer/chains
-    -v {{ hostroot }}/vars/store/orderers/{{ item.fullname }}/index:/var/hyperledger/production/orderer/index
+    -v {{ mpath }}/{{item.1.org}}/orderers/{{item.1.fullname}}/msp:/var/hyperledger/orderer/msp
+    -v {{ mpath }}/{{item.1.org}}/orderers/{{item.1.fullname}}/tls:/var/hyperledger/orderer/tls
+    -v {{ hostroot }}/vars/store/orderers/{{ item.1.fullname }}/chains:/var/hyperledger/production/orderer/chains
+    -v {{ hostroot }}/vars/store/orderers/{{ item.1.fullname }}/index:/var/hyperledger/production/orderer/index
     -e TZ="Asia/Shanghai"
+    -p {{ 6070+ item.0 |int }}:6060
     {{ container_options }}
     hyperledger/fabric-orderer:{{ fabric.release }}
-  with_items: "{{ allorderers }}"
+  with_indexed_items: "{{ allorderers }}"
   register: ordererstat
   ignore_errors: yes
 
