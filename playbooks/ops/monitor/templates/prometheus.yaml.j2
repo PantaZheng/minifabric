@@ -8,42 +8,37 @@ scrape_configs:
       - monitor.prometheus:9090
       labels:
         instance: prometheus
-  - job_name: pushGateway
-    honor_labels: true
-    static_configs:
-    - targets:
-      - monitor.pushgateway:9091
-      labels:
-        instance: pushgateway
-  - job_name: cadvisor
+  - job_name: caliper
     scrape_interval: 5s
     static_configs:
     - targets:
-      - monitor.cadvisor:8080
+      - calipertester:3000
       labels:
-        instance: cadvisor
-  - job_name: node-exporter
+        instance: caliper
+  - job_name: filestats
     scrape_interval: 5s
     static_configs:
     - targets:
-      - monitor.nodeexporter:9100
+      - monitor.filestats:9943
       labels:
-        instance: node-exporter
+        instance: filestats
   - job_name: peers
     scrape_interval: 5s
     static_configs:
 {% for peer in allpeers %}
+{% set instance = peer.fullname.split(".example.com")|first %}
     - targets:
       - {{ peer.url }}:7061
       labels:
-          instance: {{ peer.fullname }}
+        instance: {{ instance }}
 {% endfor %}
   - job_name: orderers
     scrape_interval: 5s
     static_configs:
 {% for orderer in allorderers %}
+{% set instance = orderer.fullname.split(".example.com")|first %}
     - targets:
       - {{ orderer.url }}:7060
       labels:
-        instance: {{ orderer.fullname }}
+        instance: {{ instance }}
 {% endfor %}

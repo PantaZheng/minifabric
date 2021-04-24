@@ -75,6 +75,6 @@ LANGUAGEENVS:
   java: 'java:latest'
   go: 'golang:1.16'
   node: 'node:12.20.0-alpine3.12'
-CALIPER_FABRIC_SDK_RELEASE: 2.1.0
+CALIPER_FABRIC_SDK_RELEASE: 2.2
 CALIPER_RELEASE: 0.4.2
 TIMEZONE: /etc/localtime:/etc/localtime

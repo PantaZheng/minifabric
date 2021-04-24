@@ -6,28 +6,10 @@ test:
     type: local
     number: 4
   rounds:
-{% set amount = 128 %}
-{% set labels = ['addPubRecord'] %}
-{% for label in labels %}
-  - label: {{ label }} test
-    txNumber: 1000
-    rateControl:
-      type: maximum-rate
-      opts:
-        tps: 100
-        step: 10
-        sampleInterval: 5
-        includeFailed: true
-    workload:
-      module: ./{{ CC_NAME }}/{{ label }}.js
-      arguments:
-        contractId: {{ CC_NAME }}
-        amount: {{ amount }}
-{% endfor %}
 {% set amount = 10240 %}
-{% set labels = ['addPubRecordTst','addPvtRecordTst','addPubRecord','addPvtRecord'] %}
+{% set labels = ['Pub','PubTst','Pvt','PvtTst'] %}
 {% for label in labels %}
-  - label: {{ label }} test
+  - label: {{ label }}
     txNumber: 1000
     rateControl:
       type: maximum-rate
@@ -35,7 +17,7 @@ test:
         tps: 100
         step: 10
         sampleInterval: 5
-        includeFailed: true
+        includeFailed: false
     workload:
       module: ./{{ CC_NAME }}/{{ label }}.js
       arguments:
@@ -46,7 +28,7 @@ test:
 
 {# {% set amount = 200 %}
 {% set label = 'PSRQ' %}
-  - label: {{ label }} test {{ amount }}
+  - label: {{ label }}-{{ amount }}
     txNumber: 1000
     rateControl:
       type: maximum-rate
@@ -60,7 +42,9 @@ test:
       arguments:
         contractId: {{ CC_NAME }}
         amount: {{ amount }} #}
-
+monitors:
+  transaction:
+    - module: prometheus
 
 {# {% set labels = ['GS','GPD','GPDH'] %}
 {% for label in labels %}

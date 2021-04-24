@@ -14,31 +14,16 @@
   with_items:
     - 'prometheus.yaml'
 
-- name: Docker Run Cadvisor
+- name: Docker Run FileStat Exporter
   command: >-
     docker run -d
     --network {{ NETNAME }}
-    --name monitor.cadvisor
-    --hostname monitor.cadvisor
+    --name monitor.filestats
+    --hostname monitor.filestats
     -v {{ TIMEZONE }}
-    -v /:/rootfs:ro
-    -v /var/run:/var/run:ro
-    -v /sys:/sys:ro
-    -v /var/lib/docker/:/var/lib/docker:ro
-    -v /dev/disk/:/dev/disk:ro
-    -p 8080:8080
-    --privileged
-    google/cadvisor:canary
-
-- name: Docker Run node exporter
-  command: >-
-    docker run -d
-    --network {{ NETNAME }}
-    --name monitor.nodeexporter
-    --hostname monitor.nodeexporter
-    -v {{ TIMEZONE }}
-    -p 9100:9100
-    prom/node-exporter:latest
+    -v {{ hostroot }}/vars/store:/data
+    -v {{ hostroot }}/filestats/filestat.yaml:/home/filestat.yaml
+    mdoubez/filestat_exporter -config.file /home/filestat.yaml
 
 - name: Docker Run Prometheus
   command: >-
@@ -50,24 +35,3 @@
     -v {{ TIMEZONE }}
     -v {{hostroot}}/vars/prometheus/prometheus.yaml:/etc/prometheus/prometheus.yml
     prom/prometheus:latest
-
-- name: Docker Run Prometheus Gateway
-  command: >-
-    docker run -d
-    --network {{ NETNAME }}
-    --name monitor.pushgateway
-    --hostname monitor.pushgateway
-    -p 9091:9091
-    -v {{ TIMEZONE }}
-    prom/pushgateway:latest
-
-- name: Docker Run Grafana
-  command: >-
-    docker run -d
-    --network {{ NETNAME }}
-    --name monitor.grafana
-    --hostname monitor.grafana
-    -p 3000:3000
-    -v {{ TIMEZONE }}
-    -v {{hostroot}}/vars/grafana:/etc/grafana
-    grafana/grafana:latest

@@ -15,7 +15,7 @@
     command: >-
       docker run --network {{ NETNAME }} --name calipertester --hostname calipertester
       -e TZ="Asia/Shanghai"
-      hyperledger/caliper:{{ CALIPER_RELEASE }} bind --caliper-bind-sut fabric:2.1.0
+      hyperledger/caliper:{{ CALIPER_RELEASE }} bind --caliper-bind-sut fabric:{{ CALIPER_FABRIC_SDK_RELEASE }}
 
   - name: Save the container as an image
     command: >-

@@ -1,0 +1,14 @@
+exporter:
+  working_directory: "/data"
+  files:
+    - patterns:
+      - 'orderers/*/chains/mychannel/blockfile_*'
+      - 'orderers/*/index/*.log'
+      - 'peers/*/ledgersData/bookkeeper/*.log'
+      - 'peers/*/ledgersData/chains/chains/mychannel/blockfile_*'
+      - 'peers/*/ledgersData/chains/index/*.log'
+      - 'peers/*/ledgersData/historyLeveldb/*.log'
+      - 'peers/*/ledgersData/ledgerProvider/*.log'
+      - 'peers/*/ledgersData/pvtdataStore/*.log'
+      - 'peers/*/ledgersData/stateLeveldb/*.log'
+      - 'peers/*/transientstore/*.log'
