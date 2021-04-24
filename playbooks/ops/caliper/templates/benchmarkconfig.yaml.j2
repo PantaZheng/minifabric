@@ -6,8 +6,33 @@ test:
     type: local
     number: 4
   rounds:
+{% set amount = 10 %}
+{% set label = 'PubPvtTst' %}
+  - label: {{ label }}
+    txNumber: 1000
+    rateControl:
+      type: maximum-rate
+      opts:
+        tps: 100
+        step: 10
+        sampleInterval: 5
+        includeFailed: false
+    workload:
+      module: ./{{ CC_NAME }}/{{ label }}.js
+      arguments:
+        contractId: {{ CC_NAME }}
+        amount: {{ amount }}
+  - label: zero
+    txDuration: 30
+    rateControl:
+      type: zero-rate
+    workload:
+      module: ./{{ CC_NAME }}/{{ label }}.js
+      arguments:
+        contractId: {{ CC_NAME }}
+        amount: {{ amount }}
 {% set amount = 10240 %}
-{% set labels = ['Pub','PubTst','Pvt','PvtTst'] %}
+{% set labels = ['Pub', 'PubTst', 'Pvt', 'PvtTst'] %}
 {% for label in labels %}
   - label: {{ label }}
     txNumber: 1000
@@ -18,6 +43,15 @@ test:
         step: 10
         sampleInterval: 5
         includeFailed: false
+    workload:
+      module: ./{{ CC_NAME }}/{{ label }}.js
+      arguments:
+        contractId: {{ CC_NAME }}
+        amount: {{ amount }}
+  - label: zero
+    txDuration: 60
+    rateControl:
+      type: zero-rate
     workload:
       module: ./{{ CC_NAME }}/{{ label }}.js
       arguments:

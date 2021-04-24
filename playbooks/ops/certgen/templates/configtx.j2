@@ -122,9 +122,9 @@ Orderer: &OrdererDefaults
   BatchTimeout: 2s
 
   BatchSize:
-    MaxMessageCount: 5
+    MaxMessageCount: 10
     AbsoluteMaxBytes: 100 MB
-    PreferredMaxBytes:  1MB
+    PreferredMaxBytes:  10MB
 
 {% if allorderers | length > 0 %}
   Addresses:
