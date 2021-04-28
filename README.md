@@ -1,9 +1,9 @@
 # Minifabric 
 
 ![MiniFab CI](https://github.com/hyperledger-labs/minifabric/workflows/MiniFab%20CI/badge.svg)
-[![Chat](https://raw.githubusercontent.com/hyperledger/chat-assets/master/fabric-mini.svg)](https://chat.hyperledger.org/channel/fabric-mini)
+[![Chat](https://raw.githubusercontent.com/hyperledger/chat-assets/main/fabric-mini.svg)](https://chat.hyperledger.org/channel/fabric-mini)
 
-[中文](https://github.com/hyperledger-labs/minifabric/blob/master/README.zh.md)
+[中文](https://github.com/hyperledger-labs/minifabric/blob/main/README.zh.md)
 
 If you would like to learn Hyperledger Fabric or develop your smart contract, or
 just want to get a feel of Hyperledger Fabric, Minifabric is the tool to
@@ -26,7 +26,8 @@ capabilities of Hyperledger Fabric.
 
 ## Prerequisites
 [docker](https://www.docker.com/) (18.03 or newer) environment
- 
+
+5 GB remaining Disk Storage available
 ## Getting Started    
 
 If you would like to learn more before jumping in, watch the [series of 6 videos](https://www.youtube.com/playlist?list=PL0MZ85B_96CExhq0YdHLPS5cmSBvSmwyO) on how to develop Hyperledger Fabric using Minifabric and read the [blog](https://www.hyperledger.org/blog/2020/04/29/minifabric-a-hyperledger-fabric-quick-start-tool-with-video-guides). For those impatient, please follow the steps below to start things off.
@@ -62,3 +63,6 @@ minifab cleanup
 ```
 minifab
 ```
+
+## Documents
+To know more about MiniFabric, see in [docs](./docs/README.md)

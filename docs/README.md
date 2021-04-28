@@ -3,7 +3,7 @@ Minifabric is a tool to let you setup a Fabric network, expand your network, ins
 
 It currently provides the following functions:
 
-1. Deploy a fabric network based on this [spec](https://github.com/hyperledger-labs/minifabric/blob/master/spec.yaml) or [your own spec](#Setup-a-network-using-a-different-spec)
+1. Deploy a fabric network based on this [spec](https://github.com/hyperledger-labs/minifabric/blob/main/spec.yaml) or [your own spec](#Setup-a-network-using-a-different-spec)
 2. Tear down the deployed fabric network
 3. Channel operations such as create, update, join peers to channels, channel update and channel query
 4. Chaincode operations such as install, approve, commit, upgrade, initialize, instantiate, invoke and query
@@ -130,18 +130,25 @@ You can place any ca, peer, or orderer node configuration parameters under each 
 - **Organization Name** for each node is the part of the domain name after the first dot (.)
 - **mspid** for each Organization is the translated Organization Name by substituting every dot (.) with a dash (-)
 - host **port** is generated as incremental sequences of starting port number (supplied in -e 7778)
+    - The second port(`7061`) of peer will be mapped to host port of [1000 + mapped host port number of its first port(`7051`)]
 
-Example `peer` section
+For example, following is the result for default spec.yaml with `-e 7778`
 
-> peer0.org1.com --> mspid = org1-com, organization name = org1.com hostPort=7778  
-> peer1.org1.com --> mspid = org1-com, organization name = org1.com hostPort=7779  
-> peer0.org2.com --> mspid = org2-com, organization name = org2.com hostPort=7780  
+> ca1.org0.example.com --> hostPort=7778
+> ca1.org1.example.com --> hostPort=7779
+> orderer1.example.com --> 0.0.0.0:7784->7050/tcp, 0.0.0.0:8784->7060/tcp   
+> orderer2.example.com --> 0.0.0.0:7785->7050/tcp, 0.0.0.0:8785->7060/tcp   
+> orderer3.example.com --> 0.0.0.0:7786->7050/tcp, 0.0.0.0:8786->7060/tcp   
+> peer1.org0.example.com --> mspid = org0-example-com, organization name = org0.example.com, hostPort=7780, 8780
+> peer2.org0.example.com --> mspid = org0-example-com, organization name = org0.example.com, hostPort=7781, 8781
+> peer1.org1.example.com --> mspid = org1-example-com, organization name = org1.example.com, hostPort=7782, 8782
+> peer2.org1.example.com --> mspid = org1-example-com, organization name = org1.example.com, hostPort=7783, 8783
 
 In default, **docker network** is automatically generated based on the working directory. This ensures that two different working directories will result in two different docker networks. This allows you to setup multiple sites on the same machine to mimic multiple organizations across multiple machines.
 You can assign specific docker network name by uncomment bellow line in spec.yaml file. This allows you to setup fabric capability on the existing docker network easily. If you have multiple sites on same machine, it will be necessary to have different name for each site to avoid network conflict.
 
 ```
-  # netname: "mysite0"
+  # netname: "mysite"
 ```
 
 You can add options for starting containers by uncomment bellow line in spec.yaml file. you can specify any option which supported by 'docker run' command.
@@ -299,7 +306,7 @@ metrics:   9.8.7.6:9001/metrics
 ### Execution context
 Minifab uses many settings throughout all the operations. These settings can be changed any time you run a minifab command and these settings will be saved in the vars/envsetting file. Each time a command is executed, that file will be loaded and settings specified in the command line will be written into that file. All the settings saved and specified in the command make the current execution context. They include the chaincode name, chaincode invocation parameters, chaincode version, chaincode language, channel name, Fabric release, endpoint exposure and block query number. 
 
-All the default values are set by [envsettings](https://github.com/hyperledger-labs/minifabric/blob/master/envsettings). Each of the values gets updated if specified on a command line and saved back to `./vars/envsettings`. Users are strongly discouraged to manually change that file since it is basically a script. Changes to that file should only be made by the minifab command.
+All the default values are set by [envsettings](https://github.com/hyperledger-labs/minifabric/blob/main/envsettings). Each of the values gets updated if specified on a command line and saved back to `./vars/envsettings`. Users are strongly discouraged to manually change that file since it is basically a script. Changes to that file should only be made by the minifab command.
 
 Because of the execution context, when you execute a command, you do not really have to specify all the parameters necessary if the context do not need to be changed. For example, if you just executed a chaincode invoke command, and you want to execute invoke again, then you do not need to specify the -n parameter because it is already in the current execution context. The same applies to every parameter listed in that file. You do not need to specify the parameter in a command unless you intend to use a new value in your command. Once you do, the new value becomes part of the current execution context. 
 
