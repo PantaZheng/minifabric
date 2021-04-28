@@ -6,10 +6,40 @@ test:
     type: local
     number: 4
   rounds:
-{% set amount = 10 %}
-{% set label = 'PubPvtTst' %}
+{% set amount = 1024 %}
+{% set labels = ['PubPvtTst'] %}
+{% for label in labels %}
   - label: {{ label }}
     txNumber: 1000
+    rateControl:
+      type: maximum-rate
+      opts:
+        tps: 20
+        step: 5
+        sampleInterval: 5
+        includeFailed: false
+    workload:
+      module: ./{{ CC_NAME }}/{{ label }}.js
+      arguments:
+        contractId: {{ CC_NAME }}
+        amount: {{ amount }}
+  - label: zero
+    txDuration: 10
+    rateControl:
+      type: zero-rate
+    workload:
+      module: ./{{ CC_NAME }}/{{ label }}.js
+      arguments:
+        contractId: {{ CC_NAME }}
+        amount: {{ amount }}
+{% endfor %}
+
+{% set amounts = [1, 25, 50, 75, 125] %}
+{% set labels = ['HSSQ','PSRQ','HSMQ'] %}
+{% for amount in amounts %}
+{% for label in labels %}
+  - label: {{ label }}
+    txNumber: 100
     rateControl:
       type: maximum-rate
       opts:
@@ -31,92 +61,14 @@ test:
       arguments:
         contractId: {{ CC_NAME }}
         amount: {{ amount }}
-{% set amount = 10240 %}
-{% set labels = ['Pub', 'PubTst', 'Pvt', 'PvtTst'] %}
-{% for label in labels %}
-  - label: {{ label }}
-    txNumber: 1000
-    rateControl:
-      type: maximum-rate
-      opts:
-        tps: 100
-        step: 10
-        sampleInterval: 5
-        includeFailed: false
-    workload:
-      module: ./{{ CC_NAME }}/{{ label }}.js
-      arguments:
-        contractId: {{ CC_NAME }}
-        amount: {{ amount }}
-  - label: zero
-    txDuration: 60
-    rateControl:
-      type: zero-rate
-    workload:
-      module: ./{{ CC_NAME }}/{{ label }}.js
-      arguments:
-        contractId: {{ CC_NAME }}
-        amount: {{ amount }}
+{% endfor %}
 {% endfor %}
 
-
-{# {% set amount = 200 %}
-{% set label = 'PSRQ' %}
-  - label: {{ label }}-{{ amount }}
-    txNumber: 1000
-    rateControl:
-      type: maximum-rate
-      opts:
-        tps: 100
-        step: 10
-        sampleInterval: 5
-        includeFailed: true
-    workload:
-      module: ./{{ CC_NAME }}/{{ label }}.js
-      arguments:
-        contractId: {{ CC_NAME }}
-        amount: {{ amount }} #}
 monitors:
   transaction:
     - module: prometheus
 
-{# {% set labels = ['GS','GPD','GPDH'] %}
-{% for label in labels %}
-  - label: {{ label }} test
-    txNumber: 1000
-    rateControl:
-      type: maximum-rate
-      opts:
-        tps: 100
-        step: 10
-        sampleInterval: 5
-        includeFailed: true
-    workload:
-      module: ./{{ CC_NAME }}/{{ label }}.js
-      arguments:
-        contractId: {{ CC_NAME }}
-{% endfor %}
 
-{% set amounts = [1,5,25,125] %}
-{% set labels = ['HSSQ','PSRQ','HSMQ'] %}
-{% for amount in amounts %}
-{% for label in labels %}
-  - label: {{ label }} test {{ amount }}
-    txNumber: 1000
-    rateControl:
-      type: maximum-rate
-      opts:
-        tps: 100
-        step: 10
-        sampleInterval: 5
-        includeFailed: true
-    workload:
-      module: ./{{ CC_NAME }}/{{ label }}.js
-      arguments:
-        contractId: {{ CC_NAME }}
-        amount: {{ amount }}
-{% endfor %}
-{% endfor %} #}
 
 {# monitors:
   resource:

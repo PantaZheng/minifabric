@@ -2,12 +2,6 @@ global:
   scrape_interval: 5s
   evaluation_interval: 5s
 scrape_configs:
-  - job_name: prometheus
-    static_configs:
-    - targets:
-      - monitor.prometheus:9090
-      labels:
-        instance: prometheus
   - job_name: caliper
     scrape_interval: 5s
     static_configs:
