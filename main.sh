@@ -93,10 +93,11 @@ if [ -d $(pwd)/chaincode/$CC_NAME ] && [ ! -d $(pwd)/vars/chaincode/$CC_NAME ]; 
   mkdir -p $(pwd)/vars/chaincode/$CC_NAME
   cp -r $(pwd)/chaincode/$CC_NAME $(pwd)/vars/chaincode/
 fi
+
 if [ -d $(pwd)/app/$CC_NAME ] && [ ! -d $(pwd)/vars/app/$CC_NAME ]; then
   mkdir -p $(pwd)/vars/app/$CC_NAME
-  cp -r $(pwd)/app/$CC_NAME $(pwd)/vars/app/
 fi
+
 if [ -d $(pwd)/caliper/$CC_NAME ] && [ ! -d $(pwd)/vars/caliper/workspace/$CC_NAME ]; then
   mkdir -p $(pwd)/vars/caliper/workspace/$CC_NAME
   cp -r $(pwd)/caliper/$CC_NAME $(pwd)/vars/caliper/workspace/

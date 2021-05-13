@@ -1,4 +1,4 @@
 keyUsage = critical,digitalSignature
 basicConstraints = critical,CA:FALSE
-subjectAltName=IP.1:172.28.218.92,DNS.1:peer4.org1.example.com
+subjectAltName=IP.1:172.20.97.59,DNS.1:peer2.org1.example.com,DNS.2:peer2-org1-example-com
 authorityKeyIdentifier = keyid,issuer

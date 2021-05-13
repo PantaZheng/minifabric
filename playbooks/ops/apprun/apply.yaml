@@ -20,6 +20,7 @@
 - name: Copy APP files
   command: "{{ item }}"
   with_items:
+    - 'cp -rf {{ pjroot }}/app/{{ CC_NAME }}/{{ APP_LANGUAGE }} {{ pjroot }}/vars/app/{{ CC_NAME }}'
     - 'cp {{ pjroot }}/vars/profiles/{{ CHANNEL_NAME }}_connection.yaml
       {{ pjroot }}/vars/app/{{ CC_NAME }}/{{ APP_LANGUAGE }}/profiles/connection.yaml'
     - 'cp {{ pjroot }}/vars/profiles/vscode/wallets/{{ CURRENT_ORG }}/Admin.id

@@ -227,7 +227,7 @@ func useWalletGateway() {
 		go func() {
 			defer wg.Done()
 			seededRand.Intn(20)
-			result, err := contract.SubmitTransaction("invoke", "put", uuid.New().String(),
+			result, err := contract.SubmitTransaction("Put", uuid.New().String(),
 				strconv.Itoa(seededRand.Intn(20)))
 			if err != nil {
 				logger.Errorf("Failed to commit transaction: %v", err)
