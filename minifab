@@ -41,6 +41,7 @@ docker run --rm --name minifab                    \
     -v "$(pwd)/playbooks:/home/playbooks"         \
     -v /etc/localtime:/etc/localtime              \
     -v "$(pwd)/main.sh:/home/main.sh"             \
+    -v "$(pwd)/envsettings:/home/envsettings"             \
     -v "$(pwd)/scripts:/home/scripts"             \
     -v "$(pwd)/chaincode:/home/chaincode"             \
     -v "$(pwd)/app:/home/app"             \

@@ -43,7 +43,6 @@ async function main() {
         // Submit the specified transaction.
 
         const nowTime = Date.now()
-        logger.info(`Time is ${nowTime.toString()}`)
         const seededRand = seedrandom(nowTime)
 
         let wg = new WaitGroup()
@@ -53,7 +52,7 @@ async function main() {
             const uid = uuid.v4().toString() + i.toString();
             const sid = seededRand.int32();
             counter.push(
-                contract.submitTransaction('invoke', 'put',
+                contract.submitTransaction('Put',
                     uid, sid).then((response)=>{
                     return {uid: uid,sid:sid, message: response.toJSON().data}
                 })

@@ -85,12 +85,10 @@ function printHelp() {
 }
 
 function doDefaults() {
-  declare -a params=("CHANNEL_NAME" "CC_LANGUAGE" "IMAGETAG" "BLOCK_NUMBER" "CC_VERSION"
-    "CC_NAME" "DB_TYPE" "CC_PARAMETERS" "EXPOSE_ENDPOINTS" "CURRENT_ORG" "TRANSIENT_DATA"
-    "CC_PRIVATE" "CC_POLICY" "CC_INIT_REQUIRED" "RUN_OUTPUT")
-  if [ ! -f "./vars/envsettings" ]; then
-    cp envsettings vars/envsettings
-  fi
+  declare -a params=("CHANNEL_NAME" "CC_LANGUAGE" "APP_LANGUAGE" "IMAGETAG" "BLOCK_NUMBER"
+    "CC_VERSION" "CC_NAME" "DB_TYPE" "CC_PARAMETERS" "EXPOSE_ENDPOINTS" "CURRENT_ORG"
+    "TRANSIENT_DATA" "CC_PRIVATE" "CC_POLICY" "CC_INIT_REQUIRED" "RUN_OUTPUT")
+  cp envsettings vars/envsettings
   source ./vars/envsettings
   # shellcheck disable=SC2068
   for value in ${params[@]}; do
@@ -113,6 +111,7 @@ function doDefaults() {
 function doOp() {
   ansible-playbook -i hosts \
     -e "mode=$1" -e "hostroot=$hostroot" -e "CC_LANGUAGE=$CC_LANGUAGE" \
+    -e "APP_LANGUAGE=$APP_LANGUAGE" \
     -e "DB_TYPE=$DB_TYPE" -e "CHANNEL_NAME=$CHANNEL_NAME" -e "CC_NAME=$CC_NAME" \
     -e "CC_VERSION=$CC_VERSION" -e "CHANNEL_NAME=$CHANNEL_NAME" -e "IMAGETAG=$IMAGETAG" \
     -e "CC_PARAMETERS=$CC_PARAMETERS" -e "EXPOSE_ENDPOINTS=$EXPOSE_ENDPOINTS" \

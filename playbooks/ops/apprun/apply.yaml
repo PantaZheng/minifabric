@@ -1,8 +1,4 @@
 ---
-- name: Set up app sdk release
-  set_fact:
-    APP_LANGUAGE: "go"
-
 - name: Set up app dir
   set_fact:
     APP_DIR: "/go/src/github.com/app"
@@ -25,7 +21,6 @@
       {{ pjroot }}/vars/app/{{ CC_NAME }}/{{ APP_LANGUAGE }}/profiles/connection.yaml'
     - 'cp {{ pjroot }}/vars/profiles/vscode/wallets/{{ CURRENT_ORG }}/Admin.id
       {{ pjroot }}/vars/app/{{ CC_NAME }}/{{ APP_LANGUAGE }}/profiles/wallets/Admin.id'
-
 
 - name: Run the chaincode application
   command: >-

@@ -13,3 +13,5 @@ temp
 vars
 vendor
 node_modules
+build
+.gradle

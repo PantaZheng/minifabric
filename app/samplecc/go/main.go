@@ -2,6 +2,13 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
+	"os"
+	"reflect"
+	"strconv"
+	"sync"
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/msp"
@@ -11,12 +18,6 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
 	rmsp "github.com/hyperledger/fabric-sdk-go/pkg/msp"
 	logger "github.com/sirupsen/logrus"
-	"math/rand"
-	"os"
-	"reflect"
-	"strconv"
-	"sync"
-	"time"
 )
 
 const (
@@ -152,7 +153,7 @@ func useGateway() {
 		go func() {
 			defer wg.Done()
 			seededRand.Intn(20)
-			result, err := contract.SubmitTransaction("invoke", "put", uuid.New().String(),
+			result, err := contract.SubmitTransaction("put", uuid.New().String(),
 				strconv.Itoa(seededRand.Intn(20)))
 			if err != nil {
 				fmt.Printf("Failed to commit transaction: %v", err)
@@ -160,7 +161,6 @@ func useGateway() {
 				fmt.Println("Commit is successful")
 			}
 
-			fmt.Println(reflect.TypeOf(result))
 			fmt.Printf("The results is %v", result)
 		}()
 	}

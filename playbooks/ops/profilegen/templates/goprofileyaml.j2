@@ -9,6 +9,12 @@ client:
   logging:
     level: info
 
+Cab: &DefaultCab
+  endorsingPeer: true
+  chaincodeQuery: true
+  ledgerQuery: true
+  eventSource: true
+
 channels:
   {{ CHANNEL_NAME }}:
     orderers:
@@ -18,6 +24,7 @@ channels:
     peers:
 {% for peer in allpeers %}
       {{ peer.fullname }}:
+        <<: *DefaultCab
 {% endfor %}
 
 organizations:
