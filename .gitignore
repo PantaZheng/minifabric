@@ -3,7 +3,7 @@
 *.retry
 *.log
 *.tar.gz
-playbooks/ops/certgen/v3.ext
+v3.ext
 *.lock
 # dir
 .vscode

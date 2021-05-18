@@ -46,9 +46,6 @@ public class App {
       Network network = gateway.getNetwork(NETWORK_NAME);
       Contract contract = network.getContract(CONTRACT_ID);
 
-      // get the network and contract
-      //    Network network = gateway.getNetwork(NETWORK_NAME);
-
       Random random = new Random();
 
       long startTime = System.currentTimeMillis();

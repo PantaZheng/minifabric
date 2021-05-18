@@ -1,10 +1,5 @@
-Configuration:
-  status: warn
-  name: YAMLConfigTest
-  properties:
-    property:
-      name: filename
-      value: target/test-yaml.log
+configuration:
+  status: debug
   thresholdFilter:
     level: debug
   appenders:
@@ -13,35 +8,73 @@ Configuration:
       target: SYSTEM_OUT
       PatternLayout:
         Pattern: "%m%n"
-      Filters:
-        ThresholdFilter:
-          level: error
-    File:
-      name: File
-      fileName: java.log
-      PatternLayout:
-        Pattern: "%d %p %C{1.} [%t] %m%n"
-      Filters:
-        ThresholdFilter:
-          level: debug
-
-  Loggers:
-    logger:
-      - name: org.apache.logging.log4j.test1
-        level: debug
-        additivity: false
-        ThreadContextMapFilter:
-          KeyValuePair:
-            key: test
-            value: 123
-        AppenderRef:
-          ref: STDOUT
-      - name: org.apache.logging.log4j.test2
-        level: debug
-        additivity: false
-        AppenderRef:
-          ref: File
+    RollingFile:
+      - name: DebugFile
+        fileName: log/debug.log
+        filePattern: "logs/$${date:yyyy-MM}/app-%d{MM-dd-yyyy}-%i.log.gz"
+        PatternLayout:
+          Pattern: "%d %p %C{1.} [%t] %m%n"
+        Policies:
+          SizeBasedTriggeringPolicy:
+            size: 10MB
+        Filters:
+          ThresholdFilter:
+            level: debug
+            onMatch: ACCEPT
+            onMismatch: DENY
+        DefaultRollOverStrategy:
+          max: 10
+      - name: InfoFile
+        fileName: log/info.log
+        filePattern: "logs/$${date:yyyy-MM}/app-%d{MM-dd-yyyy}-%i.log.gz"
+        PatternLayout:
+          Pattern: "%d %p %C{1.} [%t] %m%n"
+        Policies:
+          SizeBasedTriggeringPolicy:
+            size: 10MB
+        Filters:
+          ThresholdFilter:
+            level: info
+            onMatch: ACCEPT
+            onMismatch: DENY
+        DefaultRollOverStrategy:
+          max: 10
+      - name: WarnFile
+        fileName: log/warn.log
+        filePattern: "logs/$${date:yyyy-MM}/app-%d{MM-dd-yyyy}-%i.log.gz"
+        PatternLayout:
+          Pattern: "%d %p %C{1.} [%t] %m%n"
+        Policies:
+          SizeBasedTriggeringPolicy:
+            size: 10MB
+        Filters:
+          ThresholdFilter:
+            level: warn
+            onMatch: ACCEPT
+            onMismatch: DENY
+        DefaultRollOverStrategy:
+          max: 10
+      - name: ErrorFile
+        fileName: log/error.log
+        filePattern: "logs/$${date:yyyy-MM}/app-%d{MM-dd-yyyy}-%i.log.gz"
+        PatternLayout:
+          Pattern: "%d %p %C{1.} [%t] %m%n"
+        Policies:
+          SizeBasedTriggeringPolicy:
+            size: 10MB
+        Filters:
+          ThresholdFilter:
+            level: error
+            onMatch: ACCEPT
+            onMismatch: DENY
+        DefaultRollOverStrategy:
+          max: 10
+  loggers:
     Root:
-      level: error
+      level: trace
       AppenderRef:
-        ref: STDOUT
+        - ref: STDOUT
+        - ref: DebugFile
+        - ref: InfoFile
+        - ref: WarnFile
+        - ref: ErrorFile
